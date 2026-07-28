@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Beyblade Ranking</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Biblioteca do Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <div class="bg-effects">
+        <div class="spin spin1"></div>
+        <div class="spin spin2"></div>
+        <div class="spin spin3"></div>
+    </div>
+
+    <header>
+        <div class="logo">
+            <span class="logo-icon">⚡</span>
+            <h1>BEYBLADE <span>RANKING</span></h1>
+        </div>
+        <p class="subtitle">Classificação Oficial dos Bladers</p>
+    </header>
+
+    <main>
+        <section class="intro">
+            <p>Confira o ranking atualizado dos melhores Bladers. Suba no ranking, conquiste pontos e prove que é o verdadeiro campeão do Beyblade!</p>
+        </section>
+
+        <section class="ranking-section">
+            <div class="table-container">
+                <table id="ranking-table">
+                    <thead>
+                        <tr>
+                            <th>Ranking</th>
+                            <th>Nome</th>
+                            <th>Classificação</th>
+                            <th>RP</th>
+                            <th class="admin-only">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ranking-body">
+                        <!-- Preenchido pelo JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Controles do Admin -->
+        <section id="admin-controls" class="admin-only">
+            <h3>Painel do Administrador</h3>
+            <div class="admin-buttons">
+                <button onclick="adicionarPlayer()">➕ Adicionar Player</button>
+                <button onclick="salvarTudo()" class="btn-salvar">💾 Salvar Alterações</button>
+                <button onclick="sairAdmin()" class="btn-sair">🚪 Sair do Modo ADM</button>
+            </div>
+        </section>
+
+        <section class="legend">
+            <h3>Legenda de Classificação</h3>
+            <div class="legend-items">
+                <div class="legend-item"><span class="class-badge lendario">👑 Lendário</span> ≥ 4200</div>
+                <div class="legend-item"><span class="class-badge esmeralda">🟢 Esmeralda</span> ≥ 3150</div>
+                <div class="legend-item"><span class="class-badge safira">🔹 Safira</span> ≥ 2300</div>
+                <div class="legend-item"><span class="class-badge diamante">💎 Diamante</span> ≥ 1650</div>
+                <div class="legend-item"><span class="class-badge platina">🔷 Platina</span> ≥ 1150</div>
+                <div class="legend-item"><span class="class-badge ouro">🟡 Ouro</span> ≥ 750</div>
+                <div class="legend-item"><span class="class-badge prata">🥈 Prata</span> ≥ 450</div>
+                <div class="legend-item"><span class="class-badge ferro">⚪ Ferro</span> ≥ 250</div>
+                <div class="legend-item"><span class="class-badge cobre">🟠 Cobre</span> ≥ 100</div>
+                <div class="legend-item"><span class="class-badge bronze-class">🟤 Bronze</span> &lt; 100</div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>Beyblade Ranking © 2026 — Que o melhor Blader vença!</p>
+        <button id="btn-adm" onclick="entrarAdmin()">ADM</button>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

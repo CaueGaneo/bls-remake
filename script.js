@@ -54,13 +54,13 @@ document.addEventListener('DOMContentLoaded', () => {
         if (window.supabase && typeof window.supabase.createClient === 'undefined') {
           const { createClient } = window.supabase;
           if (typeof createClient === 'function') {
-            supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            supabaseClient = createClient(mvvktemmkzzmaqqgmnpo, sb_publishable_hN9NakLX5Vb27LmTuBcevg_rrd7it0p);
             return true;
           }
         }
         throw new Error('SDK do Supabase não carregou. Verifique o CDN.');
       }
-      supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      supabaseClient = window.supabase.createClient(mvvktemmkzzmaqqgmnpo, sb_publishable_hN9NakLX5Vb27LmTuBcevg_rrd7it0p);
       return true;
     } catch (err) {
       console.error('Erro ao iniciar Supabase:', err.message);

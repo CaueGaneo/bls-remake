@@ -63,7 +63,6 @@ document.addEventListener('DOMContentLoaded', () => {
       supabaseClient = window.supabase.createClient(mvvktemmkzzmaqqgmnpo, sb_publishable_hN9NakLX5Vb27LmTuBcevg_rrd7it0p);
       return true;
     } catch (err) {
-      console.error('Erro ao iniciar Supabase:', err.message);
       const tbody = document.getElementById('players-body');
       if (tbody) {
         tbody.innerHTML = '<tr><td colspan="5" class="empty-msg">Erro ao conectar com o Supabase. O botão ADM ainda funciona.</td></tr>';

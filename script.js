@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // ========== CONFIGURAÇÃO SUPABASE ==========
   // Substitua pelos dados do seu projeto Supabase
   const SUPABASE_URL = 'YOUR_SUPABASE_URL';
-  const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
+  const SUPABASE_ANON_KEY = 'mvvktemmkzzmaqqgmnpo';
 
   // Senha do administrador
   const ADMIN_PASSWORD = 'beyblade';

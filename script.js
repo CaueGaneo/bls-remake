@@ -4,11 +4,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const SUPABASE_URL = 'YOUR_SUPABASE_URL';
   const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
 
-  // Senha do administrador (altere se desejar)
+  // Senha do administrador
   const ADMIN_PASSWORD = 'beyblade';
 
-  const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
+  let supabaseClient = null;
   let isAdmin = false;
   let players = [];
 
@@ -47,8 +46,36 @@ document.addEventListener('DOMContentLoaded', () => {
     { nome: 'Blader X', rp: 280 }
   ];
 
+  // ========== INICIALIZAÇÃO DO SUPABASE (protegida) ==========
+  function initSupabase() {
+    try {
+      if (!window.supabase || typeof window.supabase.createClient !== 'function') {
+        // Alternativa: desestruturação (alguns builds UMD)
+        if (window.supabase && typeof window.supabase.createClient === 'undefined') {
+          const { createClient } = window.supabase;
+          if (typeof createClient === 'function') {
+            supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            return true;
+          }
+        }
+        throw new Error('SDK do Supabase não carregou. Verifique o CDN.');
+      }
+      supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      return true;
+    } catch (err) {
+      console.error('Erro ao iniciar Supabase:', err.message);
+      const tbody = document.getElementById('players-body');
+      if (tbody) {
+        tbody.innerHTML = '<tr><td colspan="5" class="empty-msg">Erro ao conectar com o Supabase. O botão ADM ainda funciona.</td></tr>';
+      }
+      return false;
+    }
+  }
+
   // ========== SUPABASE ==========
   async function ensureDefaultPlayers() {
+    if (!supabaseClient) return;
+
     const { data, error } = await supabaseClient
       .from('players')
       .select('id')
@@ -72,6 +99,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
   async function loadPlayers() {
     const tbody = document.getElementById('players-body');
+    if (!tbody) return;
+
+    if (!supabaseClient) {
+      tbody.innerHTML = '<tr><td colspan="5" class="empty-msg">Supabase não configurado. Configure a URL e a chave no script.js</td></tr>';
+      return;
+    }
+
     tbody.innerHTML = '<tr><td colspan="5" class="loading-msg">Carregando ranking...</td></tr>';
 
     await ensureDefaultPlayers();
@@ -83,7 +117,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (error) {
       console.error('Erro ao carregar jogadores:', error.message);
-      tbody.innerHTML = '<tr><td colspan="5" class="empty-msg">Erro ao carregar dados. Verifique a conexão com o Supabase.</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="5" class="empty-msg">Erro ao carregar dados. Verifique URL, chave e políticas RLS.</td></tr>';
       return;
     }
 
@@ -92,6 +126,11 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   async function addPlayer(nome, rp) {
+    if (!supabaseClient) {
+      alert('Supabase não está conectado.');
+      return;
+    }
+
     const { error } = await supabaseClient
       .from('players')
       .insert([{ nome, rp: Number(rp) }]);
@@ -104,6 +143,11 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   async function updatePlayer(id, nome, rp) {
+    if (!supabaseClient) {
+      alert('Supabase não está conectado.');
+      return;
+    }
+
     const { error } = await supabaseClient
       .from('players')
       .update({ nome, rp: Number(rp) })
@@ -117,6 +161,11 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   async function deletePlayer(id) {
+    if (!supabaseClient) {
+      alert('Supabase não está conectado.');
+      return;
+    }
+
     const { error } = await supabaseClient
       .from('players')
       .delete()
@@ -132,6 +181,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // ========== RENDER ==========
   function renderTable() {
     const tbody = document.getElementById('players-body');
+    if (!tbody) return;
     tbody.innerHTML = '';
 
     if (players.length === 0) {
@@ -226,7 +276,8 @@ document.addEventListener('DOMContentLoaded', () => {
   function enableAdminMode() {
     isAdmin = true;
     document.body.classList.add('admin-mode');
-    document.getElementById('admin-panel').classList.remove('hidden');
+    const panel = document.getElementById('admin-panel');
+    if (panel) panel.classList.remove('hidden');
     renderTable();
   }
 
@@ -305,11 +356,23 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // ========== EVENT LISTENERS ==========
-  document.getElementById('adm-btn').addEventListener('click', handleAdmClick);
-  document.getElementById('add-player-form').addEventListener('submit', handleAddPlayer);
-  document.getElementById('players-body').addEventListener('click', handleTableClick);
+  // ========== EVENT LISTENERS (sempre registrados) ==========
+  const admBtn = document.getElementById('adm-btn');
+  if (admBtn) {
+    admBtn.addEventListener('click', handleAdmClick);
+  }
+
+  const addForm = document.getElementById('add-player-form');
+  if (addForm) {
+    addForm.addEventListener('submit', handleAddPlayer);
+  }
+
+  const playersBody = document.getElementById('players-body');
+  if (playersBody) {
+    playersBody.addEventListener('click', handleTableClick);
+  }
 
   // ========== INIT ==========
+  initSupabase();
   loadPlayers();
 });

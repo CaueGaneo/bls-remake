@@ -1,416 +1,315 @@
-// ===========================
-// CONFIGURAÇÕES
-// ===========================
+document.addEventListener('DOMContentLoaded', () => {
+  // ========== CONFIGURAÇÃO SUPABASE ==========
+  // Substitua pelos dados do seu projeto Supabase
+  const SUPABASE_URL = 'YOUR_SUPABASE_URL';
+  const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
 
-const SUPABASE_URL = "https://mvktemmkzzmaqqmnpo.supabase.co";
-const SUPABASE_KEY = "sb_publishable_hN9NakLX5Vb27LmTuBcevg_rrd7it0p";
+  // Senha do administrador (altere se desejar)
+  const ADMIN_PASSWORD = 'beyblade';
 
-let supabase = null;
-let players = [];
-let adminMode = false;
+  const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// Jogadores criados automaticamente caso o banco esteja vazio
-const playersPadrao = [
-    { nome: "Cauê", rp: 453 },
-    { nome: "João", rp: 423 },
-    { nome: "Lorex", rp: 331 },
-    { nome: "Davi", rp: 170 },
-    { nome: "Enzo", rp: 157 },
-    { nome: "Mickey", rp: 156 },
-    { nome: "Rafa", rp: 6 }
-];
+  let isAdmin = false;
+  let players = [];
 
-// ===========================
-// CONEXÃO COM O SUPABASE
-// ===========================
+  // ========== CLASSIFICAÇÕES ==========
+  function getClassification(rp) {
+    if (rp >= 5000) return { name: 'Lendário', color: '#ff4500' };
+    if (rp >= 3500) return { name: 'Esmeralda', color: '#50c878' };
+    if (rp >= 2500) return { name: 'Safira', color: '#0f52ba' };
+    if (rp >= 1800) return { name: 'Diamante', color: '#b9f2ff' };
+    if (rp >= 1200) return { name: 'Platina', color: '#e5e4e2' };
+    if (rp >= 800)  return { name: 'Ouro', color: '#ffd700' };
+    if (rp >= 500)  return { name: 'Prata', color: '#c0c0c0' };
+    if (rp >= 300)  return { name: 'Ferro', color: '#a8a9ad' };
+    if (rp >= 150)  return { name: 'Cobre', color: '#b87333' };
+    return { name: 'Bronze', color: '#cd7f32' };
+  }
 
-function initSupabase() {
+  function getMedal(rank) {
+    if (rank === 1) return '🥇';
+    if (rank === 2) return '🥈';
+    if (rank === 3) return '🥉';
+    return '';
+  }
 
-    if (!window.supabase) {
-        alert("Erro ao carregar o Supabase.");
-        return;
-    }
+  // ========== JOGADORES PADRÃO ==========
+  const DEFAULT_PLAYERS = [
+    { nome: 'Tyson', rp: 5200 },
+    { nome: 'Kai', rp: 4850 },
+    { nome: 'Max', rp: 3600 },
+    { nome: 'Ray', rp: 3400 },
+    { nome: 'Daichi', rp: 2700 },
+    { nome: 'Hikaru', rp: 2100 },
+    { nome: 'Brooklyn', rp: 1500 },
+    { nome: 'Ryu', rp: 950 },
+    { nome: 'Kenny', rp: 620 },
+    { nome: 'Blader X', rp: 280 }
+  ];
 
-    supabase = window.supabase.createClient(
-        SUPABASE_URL,
-        SUPABASE_KEY
-    );
-}
-
-// ===========================
-// CLASSIFICAÇÕES
-// ===========================
-
-function getClassificacao(rp) {
-
-    if (rp >= 4200)
-        return { texto: "👑 Lendário", classe: "lendario" };
-
-    if (rp >= 3150)
-        return { texto: "🟢 Esmeralda", classe: "esmeralda" };
-
-    if (rp >= 2300)
-        return { texto: "🔹 Safira", classe: "safira" };
-
-    if (rp >= 1650)
-        return { texto: "💎 Diamante", classe: "diamante" };
-
-    if (rp >= 1150)
-        return { texto: "🔷 Platina", classe: "platina" };
-
-    if (rp >= 750)
-        return { texto: "🟡 Ouro", classe: "ouro" };
-
-    if (rp >= 450)
-        return { texto: "🥈 Prata", classe: "prata" };
-
-    if (rp >= 250)
-        return { texto: "⚪ Ferro", classe: "ferro" };
-
-    if (rp >= 100)
-        return { texto: "🟠 Cobre", classe: "cobre" };
-
-    return {
-        texto: "🟤 Bronze",
-        classe: "bronze-class"
-    };
-}
-
-// ===========================
-// CARREGAR PLAYERS
-// ===========================
-
-async function carregarPlayers() {
-
-    const { data, error } = await supabase
-        .from("players")
-        .select("*")
-        .order("rp", { ascending: false });
+  // ========== SUPABASE ==========
+  async function ensureDefaultPlayers() {
+    const { data, error } = await supabaseClient
+      .from('players')
+      .select('id')
+      .limit(1);
 
     if (error) {
-
-        console.error(error);
-
-        alert("Erro ao carregar o ranking.");
-
-        return;
+      console.error('Erro ao verificar tabela:', error.message);
+      return;
     }
 
-    // Banco vazio
-    if (data.length === 0) {
+    if (!data || data.length === 0) {
+      const { error: insertError } = await supabaseClient
+        .from('players')
+        .insert(DEFAULT_PLAYERS);
 
-        const { error: erroInsert } = await supabase
-            .from("players")
-            .insert(playersPadrao);
+      if (insertError) {
+        console.error('Erro ao inserir jogadores padrão:', insertError.message);
+      }
+    }
+  }
 
-        if (erroInsert) {
+  async function loadPlayers() {
+    const tbody = document.getElementById('players-body');
+    tbody.innerHTML = '<tr><td colspan="5" class="loading-msg">Carregando ranking...</td></tr>';
 
-            console.error(erroInsert);
+    await ensureDefaultPlayers();
 
-            return;
-        }
+    const { data, error } = await supabaseClient
+      .from('players')
+      .select('id, nome, rp')
+      .order('rp', { ascending: false });
 
-        return carregarPlayers();
+    if (error) {
+      console.error('Erro ao carregar jogadores:', error.message);
+      tbody.innerHTML = '<tr><td colspan="5" class="empty-msg">Erro ao carregar dados. Verifique a conexão com o Supabase.</td></tr>';
+      return;
     }
 
-    players = data;
+    players = data || [];
+    renderTable();
+  }
 
-    renderizarTabela();
-}
+  async function addPlayer(nome, rp) {
+    const { error } = await supabaseClient
+      .from('players')
+      .insert([{ nome, rp: Number(rp) }]);
 
-// ===========================
-// RENDERIZAÇÃO DA TABELA
-// ===========================
+    if (error) {
+      alert('Erro ao adicionar jogador: ' + error.message);
+      return;
+    }
+    await loadPlayers();
+  }
 
-function renderizarTabela() {
+  async function updatePlayer(id, nome, rp) {
+    const { error } = await supabaseClient
+      .from('players')
+      .update({ nome, rp: Number(rp) })
+      .eq('id', id);
 
-    players.sort((a, b) => b.rp - a.rp);
+    if (error) {
+      alert('Erro ao atualizar jogador: ' + error.message);
+      return;
+    }
+    await loadPlayers();
+  }
 
-    const tbody = document.getElementById("ranking-body");
+  async function deletePlayer(id) {
+    const { error } = await supabaseClient
+      .from('players')
+      .delete()
+      .eq('id', id);
 
-    tbody.innerHTML = "";
+    if (error) {
+      alert('Erro ao excluir jogador: ' + error.message);
+      return;
+    }
+    await loadPlayers();
+  }
+
+  // ========== RENDER ==========
+  function renderTable() {
+    const tbody = document.getElementById('players-body');
+    tbody.innerHTML = '';
+
+    if (players.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="5" class="empty-msg">Nenhum blader encontrado.</td></tr>';
+      return;
+    }
 
     players.forEach((player, index) => {
+      const rank = index + 1;
+      const medal = getMedal(rank);
+      const classification = getClassification(player.rp);
+      const rankClass = rank <= 3 ? `rank-${rank}` : '';
 
-        const posicao = index + 1;
+      const tr = document.createElement('tr');
+      tr.dataset.id = player.id;
 
-        const classificacao = getClassificacao(player.rp);
+      // Ranking
+      const tdRank = document.createElement('td');
+      tdRank.className = `rank-cell ${rankClass}`;
+      tdRank.textContent = medal ? `${medal} ${rank}` : String(rank);
 
-        let medalha = "";
+      // Nome
+      const tdNome = document.createElement('td');
+      if (isAdmin) {
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.className = 'edit-nome';
+        input.value = player.nome;
+        input.maxLength = 40;
+        input.dataset.id = player.id;
+        tdNome.appendChild(input);
+      } else {
+        tdNome.className = 'player-name';
+        tdNome.textContent = player.nome;
+      }
 
-        if (posicao === 1)
-            medalha = "gold";
+      // Classificação
+      const tdClass = document.createElement('td');
+      const badge = document.createElement('span');
+      badge.className = 'class-badge';
+      badge.textContent = classification.name;
+      badge.style.color = classification.color;
+      badge.style.borderColor = classification.color;
+      tdClass.appendChild(badge);
 
-        if (posicao === 2)
-            medalha = "silver";
+      // RP
+      const tdRp = document.createElement('td');
+      if (isAdmin) {
+        const input = document.createElement('input');
+        input.type = 'number';
+        input.className = 'edit-rp';
+        input.value = player.rp;
+        input.min = 0;
+        input.max = 99999;
+        input.dataset.id = player.id;
+        tdRp.appendChild(input);
+      } else {
+        tdRp.className = 'rp-value';
+        tdRp.textContent = player.rp.toLocaleString('pt-BR');
+      }
 
-        if (posicao === 3)
-            medalha = "bronze";
+      // Ações
+      const tdActions = document.createElement('td');
+      tdActions.className = 'admin-only actions-cell';
+      if (isAdmin) {
+        const btnSave = document.createElement('button');
+        btnSave.type = 'button';
+        btnSave.className = 'btn-save';
+        btnSave.textContent = 'Salvar';
+        btnSave.dataset.id = player.id;
 
-        const tr = document.createElement("tr");
+        const btnDelete = document.createElement('button');
+        btnDelete.type = 'button';
+        btnDelete.className = 'btn-delete';
+        btnDelete.textContent = 'Excluir';
+        btnDelete.dataset.id = player.id;
 
-        if (posicao <= 3)
-            tr.classList.add(`rank-${posicao}`);
+        tdActions.appendChild(btnSave);
+        tdActions.appendChild(btnDelete);
+      }
 
-        tr.innerHTML = `
-
-<td>
-
-<span class="rank-badge ${medalha}">
-${posicao}
-</span>
-
-</td>
-
-<td class="blader-name">
-
-<span class="nome-texto">
-
-${player.nome}
-
-</span>
-
-<input
-class="edit-input nome"
-type="text"
-value="${player.nome}"
-data-id="${player.id}"
->
-
-</td>
-
-<td>
-
-<span class="class-badge ${classificacao.classe}">
-
-${classificacao.texto}
-
-</span>
-
-</td>
-
-<td class="rp">
-
-<span class="rp-texto">
-
-${player.rp}
-
-</span>
-
-<input
-class="edit-input"
-type="number"
-value="${player.rp}"
-data-id="${player.id}"
->
-
-</td>
-
-<td class="admin-only">
-
-<button
-class="btn-acao btn-excluir"
-onclick="excluirPlayer(${player.id}, '${player.nome}')">
-
-🗑️
-
-</button>
-
-</td>
-
-`;
-
-        tbody.appendChild(tr);
-
+      tr.appendChild(tdRank);
+      tr.appendChild(tdNome);
+      tr.appendChild(tdClass);
+      tr.appendChild(tdRp);
+      tr.appendChild(tdActions);
+      tbody.appendChild(tr);
     });
+  }
 
-}
+  // ========== ADMIN ==========
+  function enableAdminMode() {
+    isAdmin = true;
+    document.body.classList.add('admin-mode');
+    document.getElementById('admin-panel').classList.remove('hidden');
+    renderTable();
+  }
 
-// ===========================
-// MODO ADMIN
-// ===========================
+  function handleAdmClick() {
+    if (isAdmin) {
+      alert('Modo administrador já está ativo.');
+      return;
+    }
 
-function entrarAdmin() {
+    const password = prompt('Digite a senha de administrador:');
+    if (password === null) return;
 
-    const senha = prompt("Digite a senha do administrador:");
+    if (password === ADMIN_PASSWORD) {
+      enableAdminMode();
+    } else {
+      alert('Senha incorreta!');
+    }
+  }
 
-    if (senha !== "ADM2008") {
+  function handleAddPlayer(event) {
+    event.preventDefault();
+    if (!isAdmin) return;
 
-        alert("Senha incorreta.");
+    const nomeInput = document.getElementById('new-nome');
+    const rpInput = document.getElementById('new-rp');
+    const nome = nomeInput.value.trim();
+    const rp = Number(rpInput.value);
 
+    if (!nome) {
+      alert('Informe o nome do blader.');
+      return;
+    }
+    if (isNaN(rp) || rp < 0) {
+      alert('RP inválido.');
+      return;
+    }
+
+    addPlayer(nome, rp).then(() => {
+      nomeInput.value = '';
+      rpInput.value = '';
+    });
+  }
+
+  function handleTableClick(event) {
+    if (!isAdmin) return;
+
+    const target = event.target;
+    const id = target.dataset.id;
+    if (!id) return;
+
+    if (target.classList.contains('btn-delete')) {
+      const confirmed = confirm('Tem certeza que deseja excluir este blader?');
+      if (confirmed) {
+        deletePlayer(id);
+      }
+      return;
+    }
+
+    if (target.classList.contains('btn-save')) {
+      const row = target.closest('tr');
+      const nomeInput = row.querySelector('.edit-nome');
+      const rpInput = row.querySelector('.edit-rp');
+      const nome = nomeInput.value.trim();
+      const rp = Number(rpInput.value);
+
+      if (!nome) {
+        alert('O nome não pode ficar vazio.');
         return;
-    }
-
-    adminMode = true;
-
-    document.body.classList.add("admin-mode");
-
-    alert("Modo administrador ativado.");
-
-}
-
-function sairAdmin() {
-
-    adminMode = false;
-
-    document.body.classList.remove("admin-mode");
-
-}
-// ===========================
-// ADICIONAR PLAYER
-// ===========================
-
-async function adicionarPlayer() {
-
-    const nome = prompt("Nome do novo player:");
-
-    if (!nome || nome.trim() === "") return;
-
-    const rp = prompt("RP inicial:", "0");
-
-    if (rp === null) return;
-
-    const { error } = await supabase
-        .from("players")
-        .insert([
-            {
-                nome: nome.trim(),
-                rp: Number(rp) || 0
-            }
-        ]);
-
-    if (error) {
-
-        alert("Erro ao adicionar jogador.");
-
-        console.error(error);
-
+      }
+      if (isNaN(rp) || rp < 0) {
+        alert('RP inválido.');
         return;
+      }
+
+      updatePlayer(id, nome, rp);
     }
+  }
 
-    carregarPlayers();
+  // ========== EVENT LISTENERS ==========
+  document.getElementById('adm-btn').addEventListener('click', handleAdmClick);
+  document.getElementById('add-player-form').addEventListener('submit', handleAddPlayer);
+  document.getElementById('players-body').addEventListener('click', handleTableClick);
 
-}
-
-// ===========================
-// EXCLUIR PLAYER
-// ===========================
-
-async function excluirPlayer(id, nome) {
-
-    const confirmar = confirm(`Excluir ${nome}?`);
-
-    if (!confirmar) return;
-
-    const { error } = await supabase
-        .from("players")
-        .delete()
-        .eq("id", id);
-
-    if (error) {
-
-        alert("Erro ao excluir.");
-
-        console.error(error);
-
-        return;
-    }
-
-    carregarPlayers();
-
-}
-
-// ===========================
-// SALVAR ALTERAÇÕES
-// ===========================
-
-async function salvarTudo() {
-
-    const linhas = document.querySelectorAll("#ranking-body tr");
-
-    for (const linha of linhas) {
-
-        const nome = linha.querySelector(".edit-input.nome");
-
-        const rp = linha.querySelector(".edit-input[type='number']");
-
-        if (!nome || !rp) continue;
-
-        const id = Number(nome.dataset.id);
-
-        const { error } = await supabase
-            .from("players")
-            .update({
-
-                nome: nome.value.trim(),
-
-                rp: Number(rp.value) || 0
-
-            })
-            .eq("id", id);
-
-        if (error) {
-
-            console.error(error);
-
-            alert("Erro ao salvar alterações.");
-
-            return;
-
-        }
-
-    }
-
-    alert("Alterações salvas!");
-
-    carregarPlayers();
-
-}
-
-// ===========================
-// EVENTOS DOS BOTÕES
-// ===========================
-
-function registrarEventos() {
-
-    document
-        .getElementById("btn-adm")
-        .addEventListener("click", entrarAdmin);
-
-    document
-        .getElementById("btn-adicionar")
-        .addEventListener("click", adicionarPlayer);
-
-    document
-        .getElementById("btn-salvar")
-        .addEventListener("click", salvarTudo);
-
-    document
-        .getElementById("btn-sair")
-        .addEventListener("click", sairAdmin);
-
-}
-
-// ===========================
-// INICIALIZAÇÃO
-// ===========================
-
-window.addEventListener("DOMContentLoaded", async () => {
-
-    initSupabase();
-
-    registrarEventos();
-
-    await carregarPlayers();
-
+  // ========== INIT ==========
+  loadPlayers();
 });
-
-// ===========================
-// FUNÇÕES GLOBAIS
-// ===========================
-
-window.excluirPlayer = excluirPlayer;
-window.entrarAdmin = entrarAdmin;
-window.sairAdmin = sairAdmin;
-window.adicionarPlayer = adicionarPlayer;
-window.salvarTudo = salvarTudo;

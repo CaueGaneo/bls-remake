@@ -48,7 +48,15 @@
     font-size: clamp(36px, 6vw, 56px); line-height: .95; margin: 0; text-transform: uppercase;
   }
   .tab-sub { color: var(--text-dim); font-size: 14px; margin: 6px 0 0; max-width: 46ch; }
-
+.back-link {
+    font-family: 'Space Mono', monospace; font-size: 12px; letter-spacing: .04em; color: var(--text);
+    text-decoration: none; white-space: nowrap;
+    padding: 10px 16px; border: 1px solid var(--line); border-radius: 6px;
+    background: var(--surface); transition: border-color .15s ease, color .15s ease, background .15s ease;
+    align-self: flex-start;
+  }
+  .back-link:hover { color: var(--flame); border-color: var(--flame); background: var(--flame-dim); }
+  .back-link:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
   /* Filtros */
   .filters { display: flex; gap: 10px; flex-wrap: wrap; margin: 28px 0 30px; }
   .filters select, .filters input {

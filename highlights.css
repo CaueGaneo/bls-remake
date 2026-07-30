@@ -1,0 +1,80 @@
+.highlights-library {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+}
+
+.highlights-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.5rem;
+}
+
+.highlight-card {
+  background: #1a1a1a;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  transition: transform 0.2s ease;
+}
+
+.highlight-card:hover {
+  transform: translateY(-4px);
+}
+
+.video-wrapper {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16/9;
+  background: #000;
+}
+
+.video-wrapper video,
+.video-wrapper iframe {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.card-info {
+  padding: 1rem 1.2rem;
+}
+
+.players {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  font-size: 1rem;
+  margin-bottom: 0.4rem;
+}
+
+.vs {
+  color: #888;
+  font-size: 0.85rem;
+}
+
+.score {
+  text-align: center;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #ffcc00; /* cor de destaque da liga */
+  margin-bottom: sab 0.6rem;
+}
+
+.meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.8rem;
+  color: #aaa;
+}
+
+.tag {
+  background: #333;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+}

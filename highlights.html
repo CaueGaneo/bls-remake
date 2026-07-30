@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Melhores Jogadas — Liga Beyblade</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Teko:wght@500;600;700&family=Space+Mono:wght@400;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #14161b;
+    --surface: #1c1f27;
+    --surface-2: #232733;
+    --line: #2c313d;
+    --text: #f1f3f6;
+    --text-dim: #8b93a1;
+    --flame: #ff5a2a;
+    --flame-dim: #ff5a2a33;
+    --cyan: #3ed9c7;
+    --focus: #ffd23f;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+
+  /* Anel de arena — decoração de fundo sutil, remete ao estádio de batalha */
+  body {
+    background-image:
+      radial-gradient(circle at 50% -10%, #ff5a2a14, transparent 55%),
+      repeating-radial-gradient(circle at 50% 0%, transparent 0 68px, #ffffff05 69px 70px);
+    min-height: 100vh;
+  }
+
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 48px 24px 80px; }
+
+  /* Cabeçalho da aba */
+  .tab-header { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 28px; }
+  .eyebrow { font-family: 'Space Mono', monospace; font-size: 12px; letter-spacing: .18em; color: var(--flame); text-transform: uppercase; margin: 0 0 6px; }
+  .tab-header h1 {
+    font-family: 'Teko', sans-serif; font-weight: 600; letter-spacing: .01em;
+    font-size: clamp(36px, 6vw, 56px); line-height: .95; margin: 0; text-transform: uppercase;
+  }
+  .tab-sub { color: var(--text-dim); font-size: 14px; margin: 6px 0 0; max-width: 46ch; }
+
+  /* Filtros */
+  .filters { display: flex; gap: 10px; flex-wrap: wrap; margin: 28px 0 30px; }
+  .filters select, .filters input {
+    background: var(--surface); border: 1px solid var(--line); color: var(--text);
+    font-family: 'Inter', sans-serif; font-size: 13px; padding: 9px 12px; border-radius: 6px;
+    outline: none;
+  }
+  .filters select:focus-visible, .filters input:focus-visible { outline: 2px solid var(--focus); outline-offset: 1px; }
+  .filters input { flex: 1; min-width: 180px; }
+
+  /* Grid de cards */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 22px;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transition: transform .18s ease, border-color .18s ease;
+  }
+  .card:hover { border-color: #3a4051; transform: translateY(-3px); }
+  @media (prefers-reduced-motion: reduce) { .card { transition: none; } .card:hover { transform: none; } }
+
+  .thumb-btn {
+    position: relative; display: block; width: 100%; aspect-ratio: 16/9;
+    border: 0; padding: 0; cursor: pointer; background: #0d0f13;
+  }
+  .thumb-btn img { width: 100%; height: 100%; object-fit: cover; display: block; opacity: .82; }
+  .thumb-btn:hover img { opacity: 1; }
+  .thumb-btn:focus-visible { outline: 2px solid var(--focus); outline-offset: -2px; }
+
+  .play-badge {
+    position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  }
+  .play-badge span {
+    width: 46px; height: 46px; border-radius: 50%; background: #ff5a2ae6;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .play-badge svg { width: 16px; height: 16px; fill: #14161b; margin-left: 2px; }
+
+  .round-tag {
+    position: absolute; top: 10px; left: 10px;
+    font-family: 'Space Mono', monospace; font-size: 10px; letter-spacing: .1em; text-transform: uppercase;
+    background: #14161bcc; color: var(--cyan); padding: 4px 8px; border-radius: 4px; border: 1px solid #ffffff1a;
+  }
+
+  .card-body { padding: 16px 16px 18px; position: relative; }
+
+  .matchup { display: flex; align-items: center; gap: 10px; }
+  .players { flex: 1; min-width: 0; }
+  .player { font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .player.winner { color: var(--flame); }
+  .vs-divider { font-family: 'Space Mono', monospace; font-size: 10px; color: var(--text-dim); margin: 3px 0; letter-spacing: .1em; }
+
+  /* Placar tipo scoreboard, com "impacto" atrás — o elemento-assinatura do design */
+  .score-wrap { position: relative; flex-shrink: 0; width: 56px; height: 56px; display: flex; align-items: center; justify-content: center; }
+  .burst {
+    position: absolute; inset: 0; opacity: .9;
+  }
+  .score {
+    position: relative; font-family: 'Teko', sans-serif; font-weight: 700; font-size: 26px; letter-spacing: .02em;
+  }
+
+  .meta-row {
+    margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--line);
+    display: flex; justify-content: space-between; align-items: center;
+    font-family: 'Space Mono', monospace; font-size: 11px; color: var(--text-dim);
+  }
+
+  .empty-state { grid-column: 1 / -1; text-align: center; padding: 60px 20px; color: var(--text-dim); font-size: 14px; }
+
+  /* Modal do player de vídeo */
+  .modal-backdrop {
+    position: fixed; inset: 0; background: #08090bd9; display: none;
+    align-items: center; justify-content: center; padding: 24px; z-index: 50;
+  }
+  .modal-backdrop.open { display: flex; }
+  .modal-box { width: 100%; max-width: 860px; }
+  .modal-video { position: relative; width: 100%; aspect-ratio: 16/9; background: #000; border-radius: 8px; overflow: hidden; }
+  .modal-video iframe, .modal-video video { width: 100%; height: 100%; border: 0; display: block; }
+  .modal-close {
+    display: block; margin: 12px auto 0; background: transparent; border: 1px solid var(--line);
+    color: var(--text-dim); font-family: 'Space Mono', monospace; font-size: 12px; letter-spacing: .08em;
+    padding: 8px 16px; border-radius: 6px; cursor: pointer; text-transform: uppercase;
+  }
+  .modal-close:hover { color: var(--text); border-color: #3a4051; }
+  .modal-close:focus-visible { outline: 2px solid var(--focus); }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="tab-header">
+    <div>
+      <p class="eyebrow">Esports · Liga Beyblade</p>
+      <h1>Melhores Jogadas</h1>
+      <p class="tab-sub">Os clipes mais decisivos das batalhas — sem partida completa, só o momento que definiu o placar.</p>
+    </div>
+  </div>
+
+  <div class="filters">
+    <input type="text" id="searchInput" placeholder="Buscar por jogador...">
+    <select id="roundFilter">
+      <option value="">Todas as fases</option>
+    </select>
+  </div>
+
+  <div class="grid" id="grid"></div>
+</div>
+
+<div class="modal-backdrop" id="modalBackdrop">
+  <div class="modal-box">
+    <div class="modal-video" id="modalVideo"></div>
+    <button class="modal-close" id="modalClose">Fechar</button>
+  </div>
+</div>
+
+<script>
+/* =======================================================================
+   DADOS DAS JOGADAS
+   -----------------------------------------------------------------------
+   Edite este array para adicionar novos clipes. Cada item é um card.
+
+   videoType: "youtube"  -> use videoId (o código depois de v= na URL)
+              "mp4"      -> use videoUrl (caminho/link do arquivo .mp4)
+
+   thumbnail: imagem de capa do card (recomendado 16:9, ex: 640x360)
+   ======================================================================= */
+const highlights = [
+  {
+    id: 1,
+    videoType: "youtube",
+    videoId: "dQw4w9WgXcQ",
+    thumbnail: "https://placehold.co/640x360/1c1f27/8b93a1?text=Clipe+1",
+    playerA: "Kai H.",
+    playerB: "Tyson G.",
+    scoreA: 3,
+    scoreB: 1,
+    winner: "A",
+    round: "Final",
+    date: "2026-07-20"
+  },
+  {
+    id: 2,
+    videoType: "mp4",
+    videoUrl: "videos/clipe2.mp4",
+    thumbnail: "https://placehold.co/640x360/1c1f27/8b93a1?text=Clipe+2",
+    playerA: "Ray K.",
+    playerB: "Max T.",
+    scoreA: 2,
+    scoreB: 3,
+    winner: "B",
+    round: "Semifinal",
+    date: "2026-07-13"
+  },
+  {
+    id: 3,
+    videoType: "youtube",
+    videoId: "dQw4w9WgXcQ",
+    thumbnail: "https://placehold.co/640x360/1c1f27/8b93a1?text=Clipe+3",
+    playerA: "Hilary S.",
+    playerB: "Daichi S.",
+    scoreA: 3,
+    scoreB: 0,
+    winner: "A",
+    round: "Fase de grupos",
+    date: "2026-07-05"
+  }
+];
+
+/* ======================= NÃO PRECISA EDITAR DAQUI PRA BAIXO ======================= */
+
+const grid = document.getElementById('grid');
+const searchInput = document.getElementById('searchInput');
+const roundFilter = document.getElementById('roundFilter');
+const modalBackdrop = document.getElementById('modalBackdrop');
+const modalVideo = document.getElementById('modalVideo');
+const modalClose = document.getElementById('modalClose');
+
+function formatDate(iso) {
+  const d = new Date(iso + 'T00:00:00');
+  return d.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' });
+}
+
+function burstSvg(color) {
+  return `<svg class="burst" viewBox="0 0 56 56" xmlns="http://www.w3.org/2000/svg">
+    <path fill="${color}" opacity="0.16" d="M28 2 L33 20 L52 16 L38 29 L50 44 L32 37 L28 54 L24 37 L6 44 L18 29 L4 16 L23 20 Z"/>
+  </svg>`;
+}
+
+function renderCard(h) {
+  const card = document.createElement('article');
+  card.className = 'card';
+
+  const winnerColor = h.winner === 'A' || h.winner === 'B' ? '#ff5a2a' : '#8b93a1';
+
+  card.innerHTML = `
+    <button class="thumb-btn" data-id="${h.id}" aria-label="Assistir jogada: ${h.playerA} contra ${h.playerB}">
+      <span class="round-tag">${h.round}</span>
+      <img src="${h.thumbnail}" alt="" loading="lazy">
+      <span class="play-badge"><span><svg viewBox="0 0 16 16"><path d="M2 1 L15 8 L2 15 Z"/></svg></span></span>
+    </button>
+    <div class="card-body">
+      <div class="matchup">
+        <div class="players">
+          <div class="player ${h.winner === 'A' ? 'winner' : ''}">${h.playerA}</div>
+          <div class="vs-divider">VS</div>
+          <div class="player ${h.winner === 'B' ? 'winner' : ''}">${h.playerB}</div>
+        </div>
+        <div class="score-wrap">
+          ${burstSvg(winnerColor)}
+          <div class="score">${h.scoreA}–${h.scoreB}</div>
+        </div>
+      </div>
+      <div class="meta-row">
+        <span>${h.round}</span>
+        <span>${formatDate(h.date)}</span>
+      </div>
+    </div>
+  `;
+
+  card.querySelector('.thumb-btn').addEventListener('click', () => openModal(h));
+  return card;
+}
+
+function openModal(h) {
+  if (h.videoType === 'youtube') {
+    modalVideo.innerHTML = `<iframe src="https://www.youtube.com/embed/${h.videoId}?autoplay=1&rel=0" title="Jogada: ${h.playerA} vs ${h.playerB}" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
+  } else {
+    modalVideo.innerHTML = `<video src="${h.videoUrl}" controls autoplay></video>`;
+  }
+  modalBackdrop.classList.add('open');
+  modalClose.focus();
+}
+
+function closeModal() {
+  modalBackdrop.classList.remove('open');
+  modalVideo.innerHTML = '';
+}
+
+modalClose.addEventListener('click', closeModal);
+modalBackdrop.addEventListener('click', (e) => { if (e.target === modalBackdrop) closeModal(); });
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
+
+function populateRoundFilter() {
+  const rounds = [...new Set(highlights.map(h => h.round))];
+  rounds.forEach(r => {
+    const opt = document.createElement('option');
+    opt.value = r; opt.textContent = r;
+    roundFilter.appendChild(opt);
+  });
+}
+
+function renderGrid() {
+  const query = searchInput.value.trim().toLowerCase();
+  const round = roundFilter.value;
+
+  const filtered = highlights.filter(h => {
+    const matchesQuery = !query || h.playerA.toLowerCase().includes(query) || h.playerB.toLowerCase().includes(query);
+    const matchesRound = !round || h.round === round;
+    return matchesQuery && matchesRound;
+  });
+
+  grid.innerHTML = '';
+  if (filtered.length === 0) {
+    grid.innerHTML = '<p class="empty-state">Nenhuma jogada encontrada para esse filtro.</p>';
+    return;
+  }
+  filtered.forEach(h => grid.appendChild(renderCard(h)));
+}
+
+searchInput.addEventListener('input', renderGrid);
+roundFilter.addEventListener('change', renderGrid);
+
+populateRoundFilter();
+renderGrid();
+</script>
+</body>
+</html>

@@ -426,3 +426,22 @@ footer {
         width: 100px;
     }
 }
+.site-nav {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  margin: 14px 0 4px;
+}
+.site-nav .nav-link {
+  color: #999;
+  text-decoration: none;
+  font-weight: 600;
+  padding: 6px 2px;
+  border-bottom: 2px solid transparent;
+  transition: color .15s ease, border-color .15s ease;
+}
+.site-nav .nav-link:hover,
+.site-nav .nav-link.active {
+  color: #fff;
+  border-color: currentColor;
+}

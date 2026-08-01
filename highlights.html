@@ -7,7 +7,6 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Teko:wght@500;600;700&family=Space+Mono:wght@400;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   :root{
     --bg: #150a1f;
@@ -31,6 +30,7 @@
     font-family: 'Inter', system-ui, sans-serif;
   }
 
+  /* Anel de arena — decoração de fundo sutil, remete ao estádio de batalha */
   body {
     background-image:
       radial-gradient(circle at 50% -10%, #ff5a2a14, transparent 55%),
@@ -40,6 +40,7 @@
 
   .wrap { max-width: 1180px; margin: 0 auto; padding: 48px 24px 80px; }
 
+  /* Cabeçalho da aba */
   .tab-header { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 28px; }
   .eyebrow { font-family: 'Space Mono', monospace; font-size: 12px; letter-spacing: .18em; color: var(--flame); text-transform: uppercase; margin: 0 0 6px; }
   .tab-header h1 {
@@ -47,7 +48,7 @@
     font-size: clamp(36px, 6vw, 56px); line-height: .95; margin: 0; text-transform: uppercase;
   }
   .tab-sub { color: var(--text-dim); font-size: 14px; margin: 6px 0 0; max-width: 46ch; }
-  .back-link {
+.back-link {
     font-family: 'Space Mono', monospace; font-size: 12px; letter-spacing: .04em; color: var(--text);
     text-decoration: none; white-space: nowrap;
     padding: 10px 16px; border: 1px solid var(--line); border-radius: 6px;
@@ -56,8 +57,8 @@
   }
   .back-link:hover { color: var(--flame); border-color: var(--flame); background: var(--flame-dim); }
   .back-link:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
-
-  .filters { display: flex; gap: 10px; flex-wrap: wrap; margin: 28px 0 30px; align-items: center; }
+  /* Filtros */
+  .filters { display: flex; gap: 10px; flex-wrap: wrap; margin: 28px 0 30px; }
   .filters select, .filters input {
     background: var(--surface); border: 1px solid var(--line); color: var(--text);
     font-family: 'Inter', sans-serif; font-size: 13px; padding: 9px 12px; border-radius: 6px;
@@ -65,36 +66,6 @@
   }
   .filters select:focus-visible, .filters input:focus-visible { outline: 2px solid var(--focus); outline-offset: 1px; }
   .filters input { flex: 1; min-width: 180px; }
-
-  /* Botão ADM */
-  #btn-adm, .admin-buttons button {
-    font-family: 'Space Mono', monospace; font-size: 12px; letter-spacing: .06em; text-transform: uppercase;
-    cursor: pointer; border-radius: 6px; padding: 9px 14px; border: 1px solid var(--line);
-    background: var(--surface); color: var(--text-dim); transition: border-color .15s ease, color .15s ease;
-  }
-  #btn-adm:hover { color: var(--flame); border-color: var(--flame); }
-  #btn-adm:focus-visible { outline: 2px solid var(--focus); }
-
-  /* Painel de admin */
-  #admin-panel {
-    display: none;
-    background: var(--surface); border: 1px solid var(--flame); border-radius: 10px;
-    padding: 20px; margin: 0 0 28px;
-  }
-  body.admin-mode #admin-panel { display: block; }
-  #admin-panel h3 {
-    font-family: 'Teko', sans-serif; font-size: 24px; letter-spacing: .02em; color: var(--flame);
-    text-transform: uppercase; margin: 0 0 14px;
-  }
-  .admin-buttons { display: flex; gap: 10px; flex-wrap: wrap; }
-  .admin-buttons .btn-primary { background: var(--flame); color: #1a0a10; border-color: var(--flame); }
-  .admin-buttons .btn-primary:hover { color: #1a0a10; opacity: .9; }
-  .admin-buttons .btn-danger { border-color: #ff4d4d; color: #ff8080; }
-  .admin-buttons .btn-danger:hover { background: #ff4d4d33; color: #ff8080; }
-
-  .admin-only { display: none; }
-  body.admin-mode .admin-only { display: inline-flex; }
-  body.admin-mode .admin-only.block { display: block; }
 
   /* Grid de cards */
   .grid {
@@ -111,7 +82,6 @@
     display: flex;
     flex-direction: column;
     transition: transform .18s ease, border-color .18s ease;
-    position: relative;
   }
   .card:hover { border-color: #3a4051; transform: translateY(-3px); }
   @media (prefers-reduced-motion: reduce) { .card { transition: none; } .card:hover { transform: none; } }
@@ -139,19 +109,6 @@
     background: #14161bcc; color: var(--cyan); padding: 4px 8px; border-radius: 4px; border: 1px solid #ffffff1a;
   }
 
-  /* Ações de admin no card (editar/excluir) */
-  .card-admin-actions {
-    position: absolute; top: 10px; right: 10px; display: none; gap: 6px; z-index: 2;
-  }
-  body.admin-mode .card-admin-actions { display: flex; }
-  .card-admin-actions button {
-    width: 30px; height: 30px; border-radius: 6px; border: 1px solid #ffffff2a;
-    background: #14161bd9; color: var(--text); cursor: pointer; font-size: 13px;
-    display: flex; align-items: center; justify-content: center;
-  }
-  .card-admin-actions button:hover { border-color: var(--focus); }
-  .card-admin-actions .del-btn:hover { color: #ff4d4d; border-color: #ff4d4d; }
-
   .card-body { padding: 16px 16px 18px; position: relative; }
 
   .matchup { display: flex; align-items: center; gap: 10px; }
@@ -160,9 +117,14 @@
   .player.winner { color: var(--flame); }
   .vs-divider { font-family: 'Space Mono', monospace; font-size: 10px; color: var(--text-dim); margin: 3px 0; letter-spacing: .1em; }
 
+  /* Placar tipo scoreboard, com "impacto" atrás — o elemento-assinatura do design */
   .score-wrap { position: relative; flex-shrink: 0; width: 56px; height: 56px; display: flex; align-items: center; justify-content: center; }
-  .burst { position: absolute; inset: 0; opacity: .9; }
-  .score { position: relative; font-family: 'Teko', sans-serif; font-weight: 700; font-size: 26px; letter-spacing: .02em; }
+  .burst {
+    position: absolute; inset: 0; opacity: .9;
+  }
+  .score {
+    position: relative; font-family: 'Teko', sans-serif; font-weight: 700; font-size: 26px; letter-spacing: .02em;
+  }
 
   .meta-row {
     margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--line);
@@ -188,39 +150,6 @@
   }
   .modal-close:hover { color: var(--text); border-color: #3a4051; }
   .modal-close:focus-visible { outline: 2px solid var(--focus); }
-
-  /* Modal de login / formulário de highlight */
-  .form-modal-backdrop {
-    position: fixed; inset: 0; background: #08090bd9; display: none;
-    align-items: center; justify-content: center; padding: 24px; z-index: 60;
-  }
-  .form-modal-backdrop.open { display: flex; }
-  .form-modal-box {
-    width: 100%; max-width: 420px; background: var(--surface); border: 1px solid var(--line);
-    border-radius: 10px; padding: 24px;
-  }
-  .form-modal-box h3 {
-    font-family: 'Teko', sans-serif; font-size: 26px; letter-spacing: .02em; color: var(--flame);
-    text-transform: uppercase; margin: 0 0 16px;
-  }
-  .form-row { margin-bottom: 12px; }
-  .form-row label {
-    display: block; font-family: 'Space Mono', monospace; font-size: 11px; letter-spacing: .06em;
-    color: var(--text-dim); text-transform: uppercase; margin-bottom: 5px;
-  }
-  .form-row input, .form-row select {
-    width: 100%; background: var(--surface-2); border: 1px solid var(--line); color: var(--text);
-    font-family: 'Inter', sans-serif; font-size: 14px; padding: 9px 10px; border-radius: 6px; outline: none;
-  }
-  .form-row input:focus-visible, .form-row select:focus-visible { outline: 2px solid var(--focus); outline-offset: 1px; }
-  .form-row-split { display: flex; gap: 10px; }
-  .form-row-split > div { flex: 1; }
-  .form-actions { display: flex; gap: 10px; margin-top: 18px; }
-  .form-actions button {
-    flex: 1; padding: 10px 14px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 13px;
-    border: 1px solid var(--line); background: var(--surface-2); color: var(--text);
-  }
-  .form-actions .submit-btn { background: var(--flame); border-color: var(--flame); color: #1a0a10; }
 </style>
 </head>
 <body>
@@ -232,7 +161,6 @@
       <h1>Melhores Jogadas</h1>
       <p class="tab-sub">Os clipes mais decisivos das batalhas — sem partida completa, só o momento que definiu o placar.</p>
     </div>
-    <a href="index.html" class="back-link">← Ranking</a>
   </div>
 
   <div class="filters">
@@ -240,21 +168,11 @@
     <select id="roundFilter">
       <option value="">Todas as fases</option>
     </select>
-    <button id="btn-adm" type="button">ADM</button>
-  </div>
-
-  <div id="admin-panel">
-    <h3>Painel do Administrador</h3>
-    <div class="admin-buttons">
-      <button type="button" class="btn-primary" id="btn-add-highlight">➕ Adicionar Jogada</button>
-      <button type="button" class="btn-danger" id="btn-sair-adm">🚪 Sair do Modo ADM</button>
-    </div>
   </div>
 
   <div class="grid" id="grid"></div>
 </div>
 
-<!-- Modal de vídeo -->
 <div class="modal-backdrop" id="modalBackdrop">
   <div class="modal-box">
     <div class="modal-video" id="modalVideo"></div>
@@ -262,99 +180,61 @@
   </div>
 </div>
 
-<!-- Modal de login ADM -->
-<div class="form-modal-backdrop" id="loginBackdrop">
-  <div class="form-modal-box">
-    <h3>Login ADM</h3>
-    <form id="loginForm">
-      <div class="form-row">
-        <label for="loginUser">Usuário</label>
-        <input type="text" id="loginUser" autocomplete="username" required>
-      </div>
-      <div class="form-row">
-        <label for="loginPass">Senha</label>
-        <input type="password" id="loginPass" autocomplete="current-password" required>
-      </div>
-      <div class="form-actions">
-        <button type="button" id="loginCancel">Cancelar</button>
-        <button type="submit" class="submit-btn">Entrar</button>
-      </div>
-    </form>
-  </div>
-</div>
-
-<!-- Modal de adicionar/editar jogada -->
-<div class="form-modal-backdrop" id="highlightFormBackdrop">
-  <div class="form-modal-box">
-    <h3 id="highlightFormTitle">Adicionar Jogada</h3>
-    <form id="highlightForm">
-      <input type="hidden" id="hf-id">
-      <div class="form-row-split">
-        <div class="form-row">
-          <label for="hf-playerA">Jogador A</label>
-          <input type="text" id="hf-playerA" required>
-        </div>
-        <div class="form-row">
-          <label for="hf-playerB">Jogador B</label>
-          <input type="text" id="hf-playerB" required>
-        </div>
-      </div>
-      <div class="form-row-split">
-        <div class="form-row">
-          <label for="hf-scoreA">Placar A</label>
-          <input type="number" id="hf-scoreA" min="0" value="0" required>
-        </div>
-        <div class="form-row">
-          <label for="hf-scoreB">Placar B</label>
-          <input type="number" id="hf-scoreB" min="0" value="0" required>
-        </div>
-      </div>
-      <div class="form-row">
-        <label for="hf-winner">Vencedor</label>
-        <select id="hf-winner">
-          <option value="A">Jogador A</option>
-          <option value="B">Jogador B</option>
-        </select>
-      </div>
-      <div class="form-row">
-        <label for="hf-round">Fase</label>
-        <input type="text" id="hf-round" placeholder="Ex: Final, Semifinal..." required>
-      </div>
-      <div class="form-row">
-        <label for="hf-date">Data</label>
-        <input type="date" id="hf-date" required>
-      </div>
-      <div class="form-row">
-        <label for="hf-videoUrl">URL do vídeo (.mp4)</label>
-        <input type="url" id="hf-videoUrl" placeholder="https://.../clipe.mp4" required>
-      </div>
-      <div class="form-row">
-        <label for="hf-thumbnail">URL da capa (opcional)</label>
-        <input type="url" id="hf-thumbnail" placeholder="https://.../capa.jpg">
-      </div>
-      <div class="form-actions">
-        <button type="button" id="highlightFormCancel">Cancelar</button>
-        <button type="submit" class="submit-btn" id="highlightFormSubmit">Salvar</button>
-      </div>
-    </form>
-  </div>
-</div>
-
 <script>
 /* =======================================================================
-   CONFIGURAÇÃO DO SUPABASE (mesmo projeto usado no ranking)
+   DADOS DAS JOGADAS
+   -----------------------------------------------------------------------
+   Edite este array para adicionar novos clipes. Cada item é um card.
+
+   videoType: "youtube"  -> use videoId (o código depois de v= na URL)
+              "mp4"      -> use videoUrl (caminho/link do arquivo .mp4)
+
+   thumbnail: imagem de capa do card (recomendado 16:9, ex: 640x360)
    ======================================================================= */
-const SUPABASE_URL = "https://mvvktemmkzzmaqqgmnpo.supabase.co";
-const SUPABASE_KEY = "sb_publishable_hN9NakLX5Vb27LmTuBcevg_rrd7it0p";
-const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const highlights = [
+  {
+    id: 1,
+    videoType: "youtube",
+    videoId: "dQw4w9WgXcQ",
+    thumbnail: "https://placehold.co/640x360/1c1f27/8b93a1?text=Clipe+1",
+    playerA: "Kai H.",
+    playerB: "Tyson G.",
+    scoreA: 3,
+    scoreB: 1,
+    winner: "A",
+    round: "Final",
+    date: "2026-07-20"
+  },
+  {
+    id: 2,
+    videoType: "mp4",
+    videoUrl: "videos/clipe2.mp4",
+    thumbnail: "https://placehold.co/640x360/1c1f27/8b93a1?text=Clipe+2",
+    playerA: "Ray K.",
+    playerB: "Max T.",
+    scoreA: 2,
+    scoreB: 3,
+    winner: "B",
+    round: "Semifinal",
+    date: "2026-07-13"
+  },
+  {
+    id: 3,
+    videoType: "youtube",
+    videoId: "dQw4w9WgXcQ",
+    thumbnail: "https://placehold.co/640x360/1c1f27/8b93a1?text=Clipe+3",
+    playerA: "Hilary S.",
+    playerB: "Daichi S.",
+    scoreA: 3,
+    scoreB: 0,
+    winner: "A",
+    round: "Fase de grupos",
+    date: "2026-07-05"
+  }
+];
 
-const ADMIN_USER = "ADM";
-const ADMIN_PASS = "ADM2008";
-const DEFAULT_THUMB = "https://placehold.co/640x360/1c1f27/8b93a1?text=Highlight";
+/* ======================= NÃO PRECISA EDITAR DAQUI PRA BAIXO ======================= */
 
-let highlights = [];
-
-/* ============================ Elementos ============================ */
 const grid = document.getElementById('grid');
 const searchInput = document.getElementById('searchInput');
 const roundFilter = document.getElementById('roundFilter');
@@ -362,19 +242,6 @@ const modalBackdrop = document.getElementById('modalBackdrop');
 const modalVideo = document.getElementById('modalVideo');
 const modalClose = document.getElementById('modalClose');
 
-const btnAdm = document.getElementById('btn-adm');
-const loginBackdrop = document.getElementById('loginBackdrop');
-const loginForm = document.getElementById('loginForm');
-const loginCancel = document.getElementById('loginCancel');
-const btnSairAdm = document.getElementById('btn-sair-adm');
-
-const btnAddHighlight = document.getElementById('btn-add-highlight');
-const highlightFormBackdrop = document.getElementById('highlightFormBackdrop');
-const highlightForm = document.getElementById('highlightForm');
-const highlightFormTitle = document.getElementById('highlightFormTitle');
-const highlightFormCancel = document.getElementById('highlightFormCancel');
-
-/* ============================ Utilitários ============================ */
 function formatDate(iso) {
   const d = new Date(iso + 'T00:00:00');
   return d.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' });
@@ -386,37 +253,6 @@ function burstSvg(color) {
   </svg>`;
 }
 
-/* ============================ Carregar dados ============================ */
-async function carregarHighlights() {
-  const { data, error } = await supabaseClient
-    .from('highlights')
-    .select('*')
-    .order('date', { ascending: false });
-
-  if (error) {
-    console.error('Erro ao carregar highlights:', error);
-    alert('Erro ao carregar as jogadas: ' + error.message);
-    return;
-  }
-
-  highlights = (data || []).map(h => ({
-    id: h.id,
-    videoUrl: h.videourl,
-    thumbnail: h.thumbnail || DEFAULT_THUMB,
-    playerA: h.playera,
-    playerB: h.playerb,
-    scoreA: h.scorea,
-    scoreB: h.scoreb,
-    winner: h.winner,
-    round: h.round,
-    date: h.date
-  }));
-
-  populateRoundFilter();
-  renderGrid();
-}
-
-/* ============================ Render ============================ */
 function renderCard(h) {
   const card = document.createElement('article');
   card.className = 'card';
@@ -424,10 +260,6 @@ function renderCard(h) {
   const winnerColor = h.winner === 'A' || h.winner === 'B' ? '#ff5a2a' : '#8b93a1';
 
   card.innerHTML = `
-    <div class="card-admin-actions">
-      <button type="button" class="edit-btn" data-id="${h.id}" title="Editar">✏️</button>
-      <button type="button" class="del-btn" data-id="${h.id}" title="Excluir">🗑️</button>
-    </div>
     <button class="thumb-btn" data-id="${h.id}" aria-label="Assistir jogada: ${h.playerA} contra ${h.playerB}">
       <span class="round-tag">${h.round}</span>
       <img src="${h.thumbnail}" alt="" loading="lazy">
@@ -453,13 +285,15 @@ function renderCard(h) {
   `;
 
   card.querySelector('.thumb-btn').addEventListener('click', () => openModal(h));
-  card.querySelector('.edit-btn').addEventListener('click', (e) => { e.stopPropagation(); openHighlightForm(h); });
-  card.querySelector('.del-btn').addEventListener('click', (e) => { e.stopPropagation(); excluirHighlight(h); });
   return card;
 }
 
 function openModal(h) {
-  modalVideo.innerHTML = `<video src="${h.videoUrl}" controls autoplay></video>`;
+  if (h.videoType === 'youtube') {
+    modalVideo.innerHTML = `<iframe src="https://www.youtube.com/embed/${h.videoId}?autoplay=1&rel=0" title="Jogada: ${h.playerA} vs ${h.playerB}" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
+  } else {
+    modalVideo.innerHTML = `<video src="${h.videoUrl}" controls autoplay></video>`;
+  }
   modalBackdrop.classList.add('open');
   modalClose.focus();
 }
@@ -471,24 +305,15 @@ function closeModal() {
 
 modalClose.addEventListener('click', closeModal);
 modalBackdrop.addEventListener('click', (e) => { if (e.target === modalBackdrop) closeModal(); });
-document.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape') {
-    closeModal();
-    closeLoginModal();
-    closeHighlightForm();
-  }
-});
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
 
 function populateRoundFilter() {
-  const selected = roundFilter.value;
   const rounds = [...new Set(highlights.map(h => h.round))];
-  roundFilter.innerHTML = '<option value="">Todas as fases</option>';
   rounds.forEach(r => {
     const opt = document.createElement('option');
     opt.value = r; opt.textContent = r;
     roundFilter.appendChild(opt);
   });
-  roundFilter.value = selected;
 }
 
 function renderGrid() {
@@ -512,112 +337,8 @@ function renderGrid() {
 searchInput.addEventListener('input', renderGrid);
 roundFilter.addEventListener('change', renderGrid);
 
-/* ============================ Login ADM ============================ */
-function openLoginModal() {
-  loginForm.reset();
-  loginBackdrop.classList.add('open');
-  document.getElementById('loginUser').focus();
-}
-function closeLoginModal() { loginBackdrop.classList.remove('open'); }
-
-btnAdm.addEventListener('click', () => {
-  if (document.body.classList.contains('admin-mode')) return;
-  openLoginModal();
-});
-loginCancel.addEventListener('click', closeLoginModal);
-loginBackdrop.addEventListener('click', (e) => { if (e.target === loginBackdrop) closeLoginModal(); });
-
-loginForm.addEventListener('submit', (e) => {
-  e.preventDefault();
-  const user = document.getElementById('loginUser').value.trim();
-  const pass = document.getElementById('loginPass').value;
-
-  if (user === ADMIN_USER && pass === ADMIN_PASS) {
-    document.body.classList.add('admin-mode');
-    closeLoginModal();
-    renderGrid();
-  } else {
-    alert('Usuário ou senha incorretos.');
-  }
-});
-
-btnSairAdm.addEventListener('click', () => {
-  document.body.classList.remove('admin-mode');
-  renderGrid();
-});
-
-/* ============================ Adicionar / editar jogada ============================ */
-function openHighlightForm(h) {
-  highlightForm.reset();
-  if (h) {
-    highlightFormTitle.textContent = 'Editar Jogada';
-    document.getElementById('hf-id').value = h.id;
-    document.getElementById('hf-playerA').value = h.playerA;
-    document.getElementById('hf-playerB').value = h.playerB;
-    document.getElementById('hf-scoreA').value = h.scoreA;
-    document.getElementById('hf-scoreB').value = h.scoreB;
-    document.getElementById('hf-winner').value = h.winner;
-    document.getElementById('hf-round').value = h.round;
-    document.getElementById('hf-date').value = h.date;
-    document.getElementById('hf-videoUrl').value = h.videoUrl;
-    document.getElementById('hf-thumbnail').value = h.thumbnail === DEFAULT_THUMB ? '' : h.thumbnail;
-  } else {
-    highlightFormTitle.textContent = 'Adicionar Jogada';
-    document.getElementById('hf-id').value = '';
-    document.getElementById('hf-date').value = new Date().toISOString().slice(0, 10);
-  }
-  highlightFormBackdrop.classList.add('open');
-}
-function closeHighlightForm() { highlightFormBackdrop.classList.remove('open'); }
-
-btnAddHighlight.addEventListener('click', () => openHighlightForm(null));
-highlightFormCancel.addEventListener('click', closeHighlightForm);
-highlightFormBackdrop.addEventListener('click', (e) => { if (e.target === highlightFormBackdrop) closeHighlightForm(); });
-
-highlightForm.addEventListener('submit', async (e) => {
-  e.preventDefault();
-
-  const id = document.getElementById('hf-id').value;
-  const payload = {
-    playera: document.getElementById('hf-playerA').value.trim(),
-    playerb: document.getElementById('hf-playerB').value.trim(),
-    scorea: Number(document.getElementById('hf-scoreA').value) || 0,
-    scoreb: Number(document.getElementById('hf-scoreB').value) || 0,
-    winner: document.getElementById('hf-winner').value,
-    round: document.getElementById('hf-round').value.trim(),
-    date: document.getElementById('hf-date').value,
-    videourl: document.getElementById('hf-videoUrl').value.trim(),
-    thumbnail: document.getElementById('hf-thumbnail').value.trim() || DEFAULT_THUMB
-  };
-
-  let error;
-  if (id) {
-    ({ error } = await supabaseClient.from('highlights').update(payload).eq('id', id));
-  } else {
-    ({ error } = await supabaseClient.from('highlights').insert([payload]));
-  }
-
-  if (error) {
-    alert('Erro ao salvar jogada: ' + error.message);
-    return;
-  }
-
-  closeHighlightForm();
-  carregarHighlights();
-});
-
-async function excluirHighlight(h) {
-  if (!confirm(`Excluir a jogada ${h.playerA} vs ${h.playerB}?`)) return;
-  const { error } = await supabaseClient.from('highlights').delete().eq('id', h.id);
-  if (error) {
-    alert('Erro ao excluir: ' + error.message);
-  } else {
-    carregarHighlights();
-  }
-}
-
-/* ============================ Início ============================ */
-carregarHighlights();
+populateRoundFilter();
+renderGrid();
 </script>
 </body>
 </html>

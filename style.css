@@ -24,18 +24,20 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: radial-gradient(circle at top, rgba(255, 255, 255, 0.08), transparent 38%),
-                linear-gradient(180deg, #3C1A7D, #25104f);
+    background:
+        radial-gradient(circle at top, rgba(255,255,255,0.10), transparent 32%),
+        radial-gradient(circle at center, rgba(124, 77, 255, 0.40), transparent 42%),
+        linear-gradient(180deg, #3C1A7D 0%, #2B125C 48%, #1D0B3F 100%);
     backdrop-filter: blur(8px);
 }
 
 .auth-card {
     width: min(92vw, 380px);
-    background: #12182b;
-    border: 1px solid #7c4dff;
+    background: rgba(20, 12, 45, 0.96);
+    border: 1px solid #8b5cf6;
     border-radius: 18px;
     padding: 26px 24px;
-    box-shadow: 0 0 30px rgba(124, 77, 255, 0.24);
+    box-shadow: 0 0 36px rgba(124, 77, 255, 0.38);
     text-align: center;
 }
 
@@ -48,23 +50,29 @@ body {
 }
 
 .auth-card h2 {
-    color: #c4b5fd;
+    color: #d8b4fe;
     margin-bottom: 10px;
+    font-size: 2rem;
 }
 
 .auth-card input {
     width: 100%;
     padding: 12px 14px;
     border-radius: 10px;
-    border: 1px solid #334155;
-    background: #0f172a;
+    border: 1px solid rgba(196, 181, 253, 0.35);
+    background: rgba(15, 23, 42, 0.92);
     color: #fff;
     margin-bottom: 12px;
     outline: none;
 }
 
+.auth-card input::placeholder {
+    color: #a5a5b7;
+}
+
 .auth-card input:focus {
-    border-color: #c4b5fd;
+    border-color: #d8b4fe;
+    box-shadow: 0 0 0 2px rgba(216, 180, 254, 0.15);
 }
 
 .auth-card button {
@@ -80,39 +88,19 @@ body {
 }
 
 .auth-card button:hover {
-    opacity: 0.92;
+    opacity: 0.95;
 }
 
 .auth-card button.secundario {
-    background: #1e293b;
+    background: #24123f;
     color: #ffffff;
+    border: 1px solid rgba(196, 181, 253, 0.25);
 }
 
 .auth-erro {
     min-height: 20px;
     margin-top: 12px;
-    color: #ff6b6b !important;
-}
-
-/* Botão fixo de sair */
-#btn-logout-floating {
-    position: fixed;
-    top: 16px;
-    right: 16px;
-    z-index: 1002;
-    background: #ef4444;
-    border: none;
-    color: white;
-    padding: 0.65rem 1rem;
-    border-radius: 10px;
-    cursor: pointer;
-    font-size: 0.9rem;
-    font-weight: 700;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.24);
-}
-
-#btn-logout-floating:hover {
-    background: #dc2626;
+    color: #ff8b8b !important;
 }
 
 /* Efeitos de fundo */
@@ -518,6 +506,21 @@ footer {
     color: white;
 }
 
+#btn-logout {
+    background: #ef4444;
+    border: none;
+    color: white;
+    padding: 0.5rem 1.2rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 700;
+}
+
+#btn-logout:hover {
+    background: #dc2626;
+}
+
 /* Responsivo */
 @media (max-width: 600px) {
     th, td {
@@ -555,12 +558,5 @@ footer {
 
     .auth-logo {
         width: 54px;
-    }
-
-    #btn-logout-floating {
-        top: 12px;
-        right: 12px;
-        padding: 0.55rem 0.85rem;
-        font-size: 0.82rem;
     }
 }

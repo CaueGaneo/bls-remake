@@ -1,61 +1,81 @@
 // =============================================
-// CONFIGURAÇÃO DO SUPABASE
+// SUPABASE
 // =============================================
 const SUPABASE_URL = "https://mvvktemmkzzmaqqgmnpo.supabase.co";
 const SUPABASE_KEY = "sb_publishable_hN9NakLX5Vb27LmTuBcevg_rrd7it0p";
-
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // =============================================
-// LOGIN DO SITE
+// AUTENTICAÇÃO
 // =============================================
-const SITE_PASSWORD = "1234"; // troque aqui a senha do site
+async function verificarSessao() {
+    const { data } = await supabaseClient.auth.getSession();
+    const user = data.session?.user;
 
-function verificarLogin() {
-    const logado = localStorage.getItem("bls_login") === "ok";
-    const loginScreen = document.getElementById("login-screen");
+    const authScreen = document.getElementById("auth-screen");
     const app = document.getElementById("app");
 
-    if (!loginScreen || !app) return;
-
-    if (logado) {
-        loginScreen.style.display = "none";
+    if (user) {
+        authScreen.style.display = "none";
         app.classList.remove("hidden");
         carregarPlayers();
     } else {
-        loginScreen.style.display = "flex";
+        authScreen.style.display = "flex";
         app.classList.add("hidden");
     }
 }
 
-function entrarSite() {
-    const senha = document.getElementById("login-pass").value.trim();
-    const erro = document.getElementById("login-erro");
+async function login() {
+    const email = document.getElementById("email").value.trim();
+    const senha = document.getElementById("senha").value.trim();
+    const erro = document.getElementById("auth-erro");
 
-    if (senha === SITE_PASSWORD) {
-        localStorage.setItem("bls_login", "ok");
-        erro.textContent = "";
-        verificarLogin();
-    } else {
-        erro.textContent = "Senha incorreta.";
+    const { error } = await supabaseClient.auth.signInWithPassword({
+        email,
+        password: senha
+    });
+
+    if (error) {
+        erro.textContent = error.message;
+        return;
     }
+
+    erro.textContent = "";
+    verificarSessao();
 }
 
-function sairLogin() {
-    localStorage.removeItem("bls_login");
-    verificarLogin();
+async function registrar() {
+    const email = document.getElementById("email").value.trim();
+    const senha = document.getElementById("senha").value.trim();
+    const erro = document.getElementById("auth-erro");
+
+    const { error } = await supabaseClient.auth.signUp({
+        email,
+        password: senha
+    });
+
+    if (error) {
+        erro.textContent = error.message;
+        return;
+    }
+
+    erro.textContent = "Conta criada. Verifique o e-mail se a confirmação estiver ativa.";
+}
+
+async function logout() {
+    await supabaseClient.auth.signOut();
+    location.reload();
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-    const input = document.getElementById("login-pass");
-
-    if (input) {
-        input.addEventListener("keydown", (e) => {
-            if (e.key === "Enter") entrarSite();
+    const senha = document.getElementById("senha");
+    if (senha) {
+        senha.addEventListener("keydown", (e) => {
+            if (e.key === "Enter") login();
         });
     }
 
-    verificarLogin();
+    verificarSessao();
 });
 
 // =============================================
@@ -100,7 +120,6 @@ async function carregarPlayers() {
         return;
     }
 
-    // Se a tabela estiver vazia, insere os players padrão
     if (!data || data.length === 0) {
         const { error: insertError } = await supabaseClient
             .from("players")
@@ -111,6 +130,7 @@ async function carregarPlayers() {
             alert("Erro ao criar ranking inicial: " + insertError.message);
             return;
         }
+
         return carregarPlayers();
     }
 
@@ -156,7 +176,7 @@ function renderizarTabela() {
     });
 }
 
-// Entrar no modo ADM
+// Modo ADM
 function entrarAdmin() {
     const senha = prompt("Digite a senha de Administrador:");
     if (senha === "ADM2008") {
@@ -167,12 +187,10 @@ function entrarAdmin() {
     }
 }
 
-// Sair do modo ADM
 function sairAdmin() {
     document.body.classList.remove("admin-mode");
 }
 
-// Adicionar player
 async function adicionarPlayer() {
     const nome = prompt("Nome do novo player:");
     if (!nome) return;
@@ -192,7 +210,6 @@ async function adicionarPlayer() {
     }
 }
 
-// Excluir player
 async function excluirPlayer(id, nome) {
     if (!confirm(`Tem certeza que deseja excluir ${nome}?`)) return;
 
@@ -208,7 +225,6 @@ async function excluirPlayer(id, nome) {
     }
 }
 
-// Salvar alterações
 async function salvarTudo() {
     const inputsNome = document.querySelectorAll(".edit-input.nome");
     const inputsRP = document.querySelectorAll(".edit-input[type='number']");

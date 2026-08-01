@@ -14,17 +14,14 @@ async function verificarSessao() {
 
     const authScreen = document.getElementById("auth-screen");
     const app = document.getElementById("app");
-    const logoutFloating = document.getElementById("btn-logout-floating");
 
     if (user) {
         if (authScreen) authScreen.style.display = "none";
         if (app) app.classList.remove("hidden");
-        if (logoutFloating) logoutFloating.style.display = "inline-flex";
         carregarPlayers();
     } else {
         if (authScreen) authScreen.style.display = "flex";
         if (app) app.classList.add("hidden");
-        if (logoutFloating) logoutFloating.style.display = "none";
     }
 }
 
@@ -70,11 +67,9 @@ async function logout() {
 
     const authScreen = document.getElementById("auth-screen");
     const app = document.getElementById("app");
-    const logoutFloating = document.getElementById("btn-logout-floating");
 
     if (authScreen) authScreen.style.display = "flex";
     if (app) app.classList.add("hidden");
-    if (logoutFloating) logoutFloating.style.display = "none";
 
     const email = document.getElementById("email");
     const senha = document.getElementById("senha");

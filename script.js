@@ -1,12 +1,66 @@
 // =============================================
-// CONFIGURAÇÃO DO SUPABASE (NÃO MEXA AQUI)
+// CONFIGURAÇÃO DO SUPABASE
 // =============================================
 const SUPABASE_URL = "https://mvvktemmkzzmaqqgmnpo.supabase.co";
 const SUPABASE_KEY = "sb_publishable_hN9NakLX5Vb27LmTuBcevg_rrd7it0p";
 
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// Dados padrão (caso a tabela esteja vazia)
+// =============================================
+// LOGIN DO SITE
+// =============================================
+const SITE_PASSWORD = "1234"; // troque aqui a senha do site
+
+function verificarLogin() {
+    const logado = localStorage.getItem("bls_login") === "ok";
+    const loginScreen = document.getElementById("login-screen");
+    const app = document.getElementById("app");
+
+    if (!loginScreen || !app) return;
+
+    if (logado) {
+        loginScreen.style.display = "none";
+        app.classList.remove("hidden");
+        carregarPlayers();
+    } else {
+        loginScreen.style.display = "flex";
+        app.classList.add("hidden");
+    }
+}
+
+function entrarSite() {
+    const senha = document.getElementById("login-pass").value.trim();
+    const erro = document.getElementById("login-erro");
+
+    if (senha === SITE_PASSWORD) {
+        localStorage.setItem("bls_login", "ok");
+        erro.textContent = "";
+        verificarLogin();
+    } else {
+        erro.textContent = "Senha incorreta.";
+    }
+}
+
+function sairLogin() {
+    localStorage.removeItem("bls_login");
+    verificarLogin();
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    const input = document.getElementById("login-pass");
+
+    if (input) {
+        input.addEventListener("keydown", (e) => {
+            if (e.key === "Enter") entrarSite();
+        });
+    }
+
+    verificarLogin();
+});
+
+// =============================================
+// DADOS PADRÃO
+// =============================================
 const playersPadrao = [
     { nome: "Cauê", rp: 453 },
     { nome: "João", rp: 423 },
@@ -57,7 +111,7 @@ async function carregarPlayers() {
             alert("Erro ao criar ranking inicial: " + insertError.message);
             return;
         }
-        return carregarPlayers(); // carrega de novo
+        return carregarPlayers();
     }
 
     players = data;
@@ -176,6 +230,3 @@ async function salvarTudo() {
     alert("Alterações salvas com sucesso!");
     carregarPlayers();
 }
-
-// Inicia o site
-carregarPlayers();

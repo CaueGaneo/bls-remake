@@ -14,14 +14,17 @@ async function verificarSessao() {
 
     const authScreen = document.getElementById("auth-screen");
     const app = document.getElementById("app");
+    const logoutFloating = document.getElementById("btn-logout-floating");
 
     if (user) {
-        authScreen.style.display = "none";
-        app.classList.remove("hidden");
+        if (authScreen) authScreen.style.display = "none";
+        if (app) app.classList.remove("hidden");
+        if (logoutFloating) logoutFloating.style.display = "inline-flex";
         carregarPlayers();
     } else {
-        authScreen.style.display = "flex";
-        app.classList.add("hidden");
+        if (authScreen) authScreen.style.display = "flex";
+        if (app) app.classList.add("hidden");
+        if (logoutFloating) logoutFloating.style.display = "none";
     }
 }
 
@@ -36,11 +39,11 @@ async function login() {
     });
 
     if (error) {
-        erro.textContent = error.message;
+        if (erro) erro.textContent = error.message;
         return;
     }
 
-    erro.textContent = "";
+    if (erro) erro.textContent = "";
     verificarSessao();
 }
 
@@ -55,11 +58,11 @@ async function registrar() {
     });
 
     if (error) {
-        erro.textContent = error.message;
+        if (erro) erro.textContent = error.message;
         return;
     }
 
-    erro.textContent = "Conta criada. Verifique o e-mail se a confirmação estiver ativa.";
+    if (erro) erro.textContent = "Conta criada. Verifique o e-mail se a confirmação estiver ativa.";
 }
 
 async function logout() {
@@ -67,9 +70,11 @@ async function logout() {
 
     const authScreen = document.getElementById("auth-screen");
     const app = document.getElementById("app");
+    const logoutFloating = document.getElementById("btn-logout-floating");
 
     if (authScreen) authScreen.style.display = "flex";
     if (app) app.classList.add("hidden");
+    if (logoutFloating) logoutFloating.style.display = "none";
 
     const email = document.getElementById("email");
     const senha = document.getElementById("senha");
@@ -88,6 +93,11 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
+    verificarSessao();
+});
+
+// Ajuda quando você volta pelo botão do navegador e o site é restaurado do cache
+window.addEventListener("pageshow", () => {
     verificarSessao();
 });
 
@@ -156,6 +166,8 @@ function renderizarTabela() {
     players.sort((a, b) => b.rp - a.rp);
 
     const tbody = document.getElementById("ranking-body");
+    if (!tbody) return;
+
     tbody.innerHTML = "";
 
     players.forEach((player, index) => {

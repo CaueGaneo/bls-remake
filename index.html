@@ -73,7 +73,6 @@
           <button onclick="adicionarPlayer()">➕ Adicionar Player</button>
           <button onclick="salvarTudo()" class="btn-salvar">💾 Salvar Alterações</button>
           <button onclick="sairAdmin()" class="btn-sair">🚪 Sair do Modo ADM</button>
-          <button onclick="logout()" class="btn-sair">🔓 Sair da conta</button>
         </div>
       </section>
 
@@ -96,7 +95,10 @@
 
     <footer>
       <p>Beyblade Ranking © 2026 — Que o melhor Blader vença!</p>
-      <button id="btn-adm" onclick="entrarAdmin()">ADM</button>
+      <div class="footer-buttons">
+        <button id="btn-adm" onclick="entrarAdmin()">ADM</button>
+        <button id="btn-logout" onclick="logout()">🚪 Sair da Conta</button>
+      </div>
     </footer>
   </div>
 

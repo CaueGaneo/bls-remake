@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Perfil - Beyblade Ranking</title>
+  <link rel="icon" type="image/jpeg" href="logo.jpg">
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+  <!-- LOGIN -->
+  <div id="auth-screen" class="auth-screen">
+    <div class="auth-card">
+      <img src="logo.jpg" alt="LBS" class="auth-logo">
+      <h2>Entrar</h2>
+
+      <input type="email" id="email" placeholder="E-mail" autocomplete="email">
+      <input type="password" id="senha" placeholder="Senha" autocomplete="current-password">
+
+      <button onclick="login()">Entrar</button>
+      <button class="secundario" onclick="registrar()">Criar conta</button>
+
+      <p id="auth-erro" class="auth-erro"></p>
+    </div>
+  </div>
+
+  <!-- APP -->
+  <div id="app" class="hidden">
+    <div class="bg-effects">
+      <div class="spin spin1"></div>
+      <div class="spin spin2"></div>
+      <div class="spin spin3"></div>
+    </div>
+
+    <header>
+      <div class="logo">
+        <img src="logo.jpg" alt="LBS" class="logo-img">
+      </div>
+      <p class="subtitle">Classificação Oficial dos Bladers</p>
+      <nav class="site-nav">
+        <a href="index.html" class="nav-link">Ranking</a>
+        <a href="highlights.html" class="nav-link">Melhores Jogadas</a>
+        <a href="perfil.html" class="nav-link active">Perfil</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="intro">
+        <p>Personalize seu perfil com apelido, bey favorito, foto e uma bio curta para deixar sua conta com a sua cara.</p>
+      </section>
+
+      <section class="profile-page">
+        <div class="profile-card">
+          <div class="profile-preview">
+            <div id="profile-avatar-preview" class="profile-avatar-preview">
+              <span id="profile-avatar-initials">?</span>
+            </div>
+
+            <div class="profile-preview-text">
+              <p class="profile-kicker">Seu perfil</p>
+              <h2 id="profile-display-name">Blader</h2>
+              <p id="profile-email" class="profile-email"></p>
+              <p id="profile-favorite-line" class="profile-favorite-line"></p>
+            </div>
+          </div>
+
+          <div class="profile-grid">
+            <label class="profile-field">
+              <span>Apelido</span>
+              <input type="text" id="profile-nickname" placeholder="Seu apelido">
+            </label>
+
+            <label class="profile-field">
+              <span>Bey favorito</span>
+              <input type="text" id="profile-favorite-bey" placeholder="Ex.: Variares, Dranzer...">
+            </label>
+
+            <label class="profile-field">
+              <span>Foto de perfil (URL)</span>
+              <input type="url" id="profile-avatar-url" placeholder="Cole o link da imagem">
+            </label>
+
+            <label class="profile-field">
+              <span>Cor de destaque</span>
+              <input type="color" id="profile-accent-color" value="#00b4ff">
+            </label>
+
+            <label class="profile-field profile-field-full">
+              <span>Bio</span>
+              <textarea id="profile-bio" rows="4" placeholder="Fale um pouco sobre você..."></textarea>
+            </label>
+          </div>
+
+          <div class="profile-actions">
+            <button id="btn-profile-save" onclick="salvarPerfil()">Salvar perfil</button>
+            <button id="btn-profile-reset" onclick="recarregarPerfil()">Recarregar</button>
+          </div>
+
+          <p id="profile-feedback" class="profile-feedback"></p>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <p>Beyblade Ranking © 2026 — Que o melhor Blader vença!</p>
+      <div class="footer-buttons">
+        <button id="btn-adm" onclick="entrarAdmin()">ADM</button>
+        <button id="btn-logout" onclick="logout()">🚪 Sair da Conta</button>
+      </div>
+    </footer>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

@@ -64,7 +64,20 @@ async function registrar() {
 
 async function logout() {
     await supabaseClient.auth.signOut();
-    location.reload();
+
+    const authScreen = document.getElementById("auth-screen");
+    const app = document.getElementById("app");
+
+    if (authScreen) authScreen.style.display = "flex";
+    if (app) app.classList.add("hidden");
+
+    const email = document.getElementById("email");
+    const senha = document.getElementById("senha");
+    const erro = document.getElementById("auth-erro");
+
+    if (email) email.value = "";
+    if (senha) senha.value = "";
+    if (erro) erro.textContent = "";
 }
 
 document.addEventListener("DOMContentLoaded", () => {

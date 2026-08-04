@@ -876,3 +876,26 @@ body.admin-mode .admin-only-block { display: block; }
 .divider { border: none; border-top: 1px solid #1e293b; margin: 20px 0; }
 
 .empty-hint { color: #64748b; font-size: 0.9rem; }
+/* Botões Entrar / Sair na navegação */
+.nav-auth-btn {
+  background: #1e293b;
+  border: 1px solid #334155;
+  color: #fff;
+  padding: 6px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  margin-left: 8px;
+}
+.nav-auth-btn:hover {
+  background: #334155;
+}
+.nav-auth-sair {
+  background: #ef4444;
+  border-color: #ef4444;
+}
+.nav-auth-sair:hover {
+  background: #dc2626;
+}

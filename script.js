@@ -41,8 +41,12 @@ async function verificarSessao() {
 function atualizarBotoesAuth(user) {
     const btnLogout = document.getElementById("btn-logout");
     const btnLogin = document.getElementById("btn-login");
-    if (btnLogout) btnLogout.style.display = user ? "inline-block" : "none";
-    if (btnLogin) btnLogin.style.display = user ? "none" : "inline-block";
+    if (btnLogout) {
+        btnLogout.style.display = user ? "inline-block" : "none";
+    }
+    if (btnLogin) {
+        btnLogin.style.display = user ? "none" : "inline-block";
+    }
 }
 
 async function login() {

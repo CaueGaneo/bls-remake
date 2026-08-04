@@ -9,8 +9,6 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
-
-  <!-- LOGIN -->
   <div id="auth-screen" class="auth-screen">
     <div class="auth-card">
       <img src="logo.jpg" alt="LBS" class="auth-logo">
@@ -23,7 +21,6 @@
     </div>
   </div>
 
-  <!-- APP -->
   <div id="app" class="hidden">
     <div class="bg-effects">
       <div class="spin spin1"></div>
@@ -42,7 +39,7 @@
     </header>
 
     <main>
-      <!-- Seletor de jogador, só aparece pro ADM -->
+      <!-- ADM: escolher jogador -->
       <section class="profile-page admin-only-block" id="admin-player-switch">
         <div class="profile-card" style="padding:14px 20px;">
           <label class="profile-field" style="max-width:340px;">
@@ -52,52 +49,33 @@
         </div>
       </section>
 
-      <!-- ======================= AINDA SEM PERFIL: aba de criação ======================= -->
-      <section class="profile-page" id="tela-criacao">
+      <!-- Sem perfil vinculado: vincular ao ranking OU mensagem -->
+      <section class="profile-page hidden" id="tela-criacao">
         <div class="profile-card">
-          <p class="profile-kicker">Criação de perfil</p>
-          <h2 style="margin-bottom:14px;">Crie seu perfil de Blader</h2>
-          <p style="color:#a0aec0;margin-bottom:18px;">Isso também cria sua entrada no ranking.</p>
-
-          <div class="profile-grid">
-            <label class="profile-field">
-              <span>Nome / Apelido</span>
-              <input type="text" id="criar-nome" placeholder="Como você aparece no ranking">
-            </label>
-            <label class="profile-field">
-              <span>Bey favorito</span>
-              <input type="text" id="criar-bey" placeholder="Ex.: Variares, Dranzer...">
-            </label>
-            <label class="profile-field">
-              <span>Estilo de batalha</span>
-              <select id="criar-estilo">
-                <option value="">Selecione...</option>
-                <option>Ataque</option>
-                <option>Defesa</option>
-                <option>Resistência</option>
-                <option>Balance</option>
-              </select>
-            </label>
-            <label class="profile-field">
-              <span>Foto de perfil (URL)</span>
-              <input type="url" id="criar-avatar" placeholder="Cole o link da imagem">
-            </label>
-            <label class="profile-field profile-field-full">
-              <span>Bio</span>
-              <textarea id="criar-bio" rows="3" placeholder="Fale um pouco sobre você..."></textarea>
-            </label>
-          </div>
-
+          <p class="profile-kicker">Seu perfil</p>
+          <h2 style="margin-bottom:10px;">Vincular ao ranking</h2>
+          <p style="color:#a0aec0;margin-bottom:16px;">
+            Se você já está no ranking, escolha seu nome. Isso <strong>não cria</strong> outro jogador.
+            (Só o ADM edita os dados do perfil.)
+          </p>
+          <label class="profile-field">
+            <span>Meu nome no ranking</span>
+            <select id="vincular-player"></select>
+          </label>
           <div class="profile-actions">
-            <button id="btn-profile-save" onclick="criarMeuPerfil()">Criar perfil</button>
+            <button type="button" onclick="vincularMeuPerfil()">Vincular meu perfil</button>
           </div>
           <p id="profile-feedback" class="profile-feedback"></p>
+          <p style="color:#64748b;font-size:0.9rem;margin-top:16px;">
+            Não aparece na lista? Peça ao ADM para te adicionar no ranking primeiro.
+          </p>
         </div>
       </section>
 
-      <!-- ======================= PERFIL COMPLETO ======================= -->
+      <!-- PERFIL COMPLETO -->
       <section class="profile-page hidden" id="tela-perfil">
 
+        <!-- 👤 Informações -->
         <div class="profile-card">
           <div class="profile-preview">
             <div id="profile-avatar-preview" class="profile-avatar-preview">
@@ -106,27 +84,38 @@
             <div class="profile-preview-text">
               <p class="profile-kicker" id="profile-classificacao">—</p>
               <h2 id="profile-display-name">Blader</h2>
+              <p id="profile-equipe" class="profile-favorite-line"></p>
+              <p id="profile-cidade" class="profile-favorite-line"></p>
+              <p id="profile-entrada" class="profile-favorite-line"></p>
               <p id="profile-favorite-line" class="profile-favorite-line"></p>
+              <p id="profile-estilo-line" class="profile-favorite-line"></p>
               <p id="profile-bio-line" class="profile-favorite-line"></p>
             </div>
           </div>
 
+          <!-- 📊 Estatísticas -->
           <div class="stat-grid">
             <div class="stat-box"><div class="value" id="stat-ranking">-</div><div class="label">Ranking</div></div>
             <div class="stat-box"><div class="value" id="stat-rp">0</div><div class="label">RP</div></div>
             <div class="stat-box"><div class="value" id="stat-vitorias">0</div><div class="label">Vitórias</div></div>
             <div class="stat-box"><div class="value" id="stat-derrotas">0</div><div class="label">Derrotas</div></div>
-            <div class="stat-box"><div class="value" id="stat-taxa">0%</div><div class="label">Taxa de Vitória</div></div>
+            <div class="stat-box"><div class="value" id="stat-empates">0</div><div class="label">Empates</div></div>
+            <div class="stat-box"><div class="value" id="stat-taxa">0%</div><div class="label">Taxa</div></div>
+            <div class="stat-box"><div class="value" id="stat-partidas">0</div><div class="label">Partidas</div></div>
+            <div class="stat-box"><div class="value" id="stat-campeonatos">0</div><div class="label">Campeonatos</div></div>
+            <div class="stat-box"><div class="value" id="stat-titulos">0</div><div class="label">Títulos</div></div>
           </div>
         </div>
 
+        <!-- ⭐ Notas técnicas -->
         <div class="profile-card">
-          <h3 class="section-title">⭐ Atributos</h3>
+          <h3 class="section-title">⭐ Notas Técnicas <span class="tag-adm">ADM</span></h3>
           <div id="barras-atributos"></div>
         </div>
 
+        <!-- 🎯 Avaliação -->
         <div class="profile-card">
-          <h3 class="section-title">Relatório Técnico <span class="tag-adm">ADM</span></h3>
+          <h3 class="section-title">🎯 Avaliação Técnica <span class="tag-adm">ADM</span></h3>
           <div class="points-grid">
             <div>
               <h4 class="points-heading strong">✅ Pontos Fortes</h4>
@@ -137,138 +126,176 @@
               <ul class="points-list improve" id="lista-melhorar"></ul>
             </div>
           </div>
+        </div>
+
+        <!-- 📝 Relatório -->
+        <div class="profile-card">
+          <h3 class="section-title">📝 Relatório Técnico <span class="tag-adm">ADM</span></h3>
           <div class="tech-comment" id="comentario-tecnico"></div>
         </div>
 
-        <div class="profile-card">
-          <h3 class="section-title">🎥 Melhores Momentos</h3>
-          <div id="lista-momentos"></div>
-        </div>
-
+        <!-- 🏅 Conquistas -->
         <div class="profile-card">
           <h3 class="section-title">🏅 Conquistas</h3>
           <div class="badges" id="lista-conquistas"></div>
         </div>
 
+        <!-- 🎥 Melhores jogadas -->
         <div class="profile-card">
-          <h3 class="section-title">📜 Histórico</h3>
-          <div class="timeline" id="timeline-historico"></div>
+          <h3 class="section-title">🎥 Melhores Jogadas</h3>
+          <div id="lista-momentos"></div>
         </div>
 
-        <!-- Edição de dados básicos (só o dono edita) -->
-        <div class="profile-card" id="edicao-basica">
-          <h3 class="section-title">Editar meus dados</h3>
-          <div class="profile-grid">
-            <label class="profile-field">
-              <span>Bey favorito</span>
-              <input type="text" id="profile-favorite-bey">
-            </label>
-            <label class="profile-field">
-              <span>Foto de perfil (URL)</span>
-              <input type="url" id="profile-avatar-url">
-            </label>
-            <label class="profile-field">
-              <span>Cor de destaque</span>
-              <input type="color" id="profile-accent-color" value="#00b4ff">
-            </label>
-            <label class="profile-field profile-field-full">
-              <span>Bio</span>
-              <textarea id="profile-bio" rows="3"></textarea>
-            </label>
-          </div>
-          <div class="profile-actions">
-            <button id="btn-profile-save2" onclick="salvarPerfil()">Salvar</button>
-          </div>
-          <p id="profile-feedback2" class="profile-feedback"></p>
+        <!-- 📸 Galeria -->
+        <div class="profile-card">
+          <h3 class="section-title">📸 Galeria</h3>
+          <div id="lista-galeria" class="badges"></div>
         </div>
 
-        <!-- Painel do ADM: só aparece em admin-mode -->
+        <!-- 📈 Evolução -->
+        <div class="profile-card">
+          <h3 class="section-title">📈 Evolução</h3>
+          <div class="timeline" id="timeline-evolucao"></div>
+        </div>
+
+        <!-- 📅 Competições -->
+        <div class="profile-card">
+          <h3 class="section-title">📅 Histórico de Competições</h3>
+          <div class="timeline" id="timeline-competicoes"></div>
+        </div>
+
+        <!-- 🏆 Partidas -->
+        <div class="profile-card">
+          <h3 class="section-title">🏆 Histórico de Partidas</h3>
+          <div class="timeline" id="timeline-partidas"></div>
+        </div>
+
+        <!-- 🛠️ PAINEL ADM -->
         <div class="profile-card admin-only-block" id="painel-adm-perfil">
-          <h3 class="section-title" style="color:#ff6b00;">Painel do Administrador</h3>
+          <h3 class="section-title" style="color:#ff6b00;">🛠️ Painel do Administrador</h3>
 
-          <label class="profile-field">
-            <span>Vitórias</span>
-            <input type="number" id="adm-vitorias" min="0">
-          </label>
-          <label class="profile-field">
-            <span>Derrotas</span>
-            <input type="number" id="adm-derrotas" min="0">
-          </label>
-
-          <label class="profile-field">
-            <span>Pontos fortes (um por linha)</span>
-            <textarea id="adm-fortes" rows="4"></textarea>
-          </label>
-          <label class="profile-field">
-            <span>Pontos a melhorar (um por linha)</span>
-            <textarea id="adm-melhorar" rows="4"></textarea>
-          </label>
-          <label class="profile-field">
-            <span>Comentário técnico</span>
-            <textarea id="adm-comentario" rows="3"></textarea>
-          </label>
-
+          <h4 class="points-heading">Informações do jogador</h4>
           <div class="profile-grid">
+            <label class="profile-field"><span>Nome</span><input type="text" id="adm-nome"></label>
+            <label class="profile-field"><span>Equipe</span><input type="text" id="adm-equipe"></label>
+            <label class="profile-field"><span>Cidade/Estado</span><input type="text" id="adm-cidade"></label>
+            <label class="profile-field"><span>Data de entrada</span><input type="date" id="adm-entrada"></label>
+            <label class="profile-field"><span>Bey favorito</span><input type="text" id="adm-bey"></label>
             <label class="profile-field">
-              <span>Ataque (%)</span>
-              <input type="number" id="adm-ataque" min="0" max="100">
+              <span>Tipo de batalha</span>
+              <select id="adm-estilo">
+                <option value="">—</option>
+                <option>Ataque</option>
+                <option>Defesa</option>
+                <option>Resistência</option>
+                <option>Balance</option>
+              </select>
             </label>
-            <label class="profile-field">
-              <span>Defesa (%)</span>
-              <input type="number" id="adm-defesa" min="0" max="100">
-            </label>
-            <label class="profile-field">
-              <span>Resistência (%)</span>
-              <input type="number" id="adm-resistencia" min="0" max="100">
-            </label>
-          </div>
-
-          <div class="profile-actions">
-            <button id="btn-salvar-analise" onclick="salvarAnaliseAdm()">Salvar análise</button>
+            <label class="profile-field"><span>Foto (URL)</span><input type="url" id="adm-avatar"></label>
+            <label class="profile-field"><span>RP</span><input type="number" id="adm-rp" min="0"></label>
+            <label class="profile-field profile-field-full"><span>Bio</span><textarea id="adm-bio" rows="2"></textarea></label>
           </div>
 
           <hr class="divider">
+          <h4 class="points-heading">Estatísticas</h4>
+          <div class="profile-grid">
+            <label class="profile-field"><span>Vitórias</span><input type="number" id="adm-vitorias" min="0"></label>
+            <label class="profile-field"><span>Derrotas</span><input type="number" id="adm-derrotas" min="0"></label>
+            <label class="profile-field"><span>Empates</span><input type="number" id="adm-empates" min="0"></label>
+            <label class="profile-field"><span>Campeonatos</span><input type="number" id="adm-campeonatos" min="0"></label>
+            <label class="profile-field"><span>Títulos</span><input type="number" id="adm-titulos" min="0"></label>
+          </div>
 
+          <hr class="divider">
+          <h4 class="points-heading">Notas técnicas (0–100)</h4>
+          <div class="profile-grid">
+            <label class="profile-field"><span>Ataque</span><input type="number" id="adm-ataque" min="0" max="100"></label>
+            <label class="profile-field"><span>Defesa</span><input type="number" id="adm-defesa" min="0" max="100"></label>
+            <label class="profile-field"><span>Resistência</span><input type="number" id="adm-resistencia" min="0" max="100"></label>
+            <label class="profile-field"><span>Controle</span><input type="number" id="adm-controle" min="0" max="100"></label>
+            <label class="profile-field"><span>Estratégia</span><input type="number" id="adm-estrategia" min="0" max="100"></label>
+            <label class="profile-field"><span>Criatividade</span><input type="number" id="adm-criatividade" min="0" max="100"></label>
+            <label class="profile-field"><span>Consistência</span><input type="number" id="adm-consistencia" min="0" max="100"></label>
+          </div>
+
+          <hr class="divider">
+          <label class="profile-field"><span>Pontos fortes (um por linha)</span><textarea id="adm-fortes" rows="4"></textarea></label>
+          <label class="profile-field"><span>Pontos a melhorar (um por linha)</span><textarea id="adm-melhorar" rows="4"></textarea></label>
+          <label class="profile-field"><span>Relatório técnico</span><textarea id="adm-comentario" rows="4"></textarea></label>
+
+          <div class="profile-actions">
+            <button onclick="salvarTudoAdm()">💾 Salvar tudo</button>
+          </div>
+
+          <hr class="divider">
           <h4 class="points-heading">Adicionar conquista</h4>
           <div class="profile-grid">
-            <label class="profile-field">
-              <span>Nome da conquista</span>
-              <input type="text" id="adm-nova-conquista" placeholder="Ex: Ring Out Master">
-            </label>
+            <label class="profile-field"><span>Nome</span><input type="text" id="adm-nova-conquista" placeholder="Ex: Ring Out Master"></label>
           </div>
           <div class="profile-actions"><button onclick="admAdicionarConquista()">Adicionar</button></div>
 
           <hr class="divider">
-
-          <h4 class="points-heading">Adicionar item ao histórico</h4>
+          <h4 class="points-heading">Adicionar melhor jogada</h4>
           <div class="profile-grid">
-            <label class="profile-field">
-              <span>Descrição</span>
-              <input type="text" id="adm-historico-desc" placeholder="Ex: 1º Lugar - Campeonato de Julho">
-            </label>
-          </div>
-          <div class="profile-actions"><button onclick="admAdicionarHistorico()">Adicionar</button></div>
-
-          <hr class="divider">
-
-          <h4 class="points-heading">Adicionar Melhor Momento</h4>
-          <div class="profile-grid">
-            <label class="profile-field">
-              <span>Título</span>
-              <input type="text" id="adm-momento-titulo" placeholder="Ex: Burst Finish contra João">
-            </label>
-            <label class="profile-field">
-              <span>URL do vídeo (.mp4)</span>
-              <input type="url" id="adm-momento-url" placeholder="https://.../clipe.mp4">
-            </label>
-            <label class="profile-field profile-field-full">
-              <span>Legenda</span>
-              <input type="text" id="adm-momento-legenda" placeholder="Ex: A melhor jogada do campeonato.">
-            </label>
+            <label class="profile-field"><span>Título</span><input type="text" id="adm-momento-titulo"></label>
+            <label class="profile-field"><span>URL do vídeo</span><input type="url" id="adm-momento-url"></label>
+            <label class="profile-field profile-field-full"><span>Legenda</span><input type="text" id="adm-momento-legenda"></label>
           </div>
           <div class="profile-actions"><button onclick="admAdicionarMomento()">Adicionar</button></div>
-        </div>
 
+          <hr class="divider">
+          <h4 class="points-heading">Adicionar foto na galeria</h4>
+          <div class="profile-grid">
+            <label class="profile-field"><span>URL da imagem</span><input type="url" id="adm-galeria-url"></label>
+            <label class="profile-field"><span>Legenda</span><input type="text" id="adm-galeria-legenda"></label>
+          </div>
+          <div class="profile-actions"><button onclick="admAdicionarGaleria()">Adicionar</button></div>
+
+          <hr class="divider">
+          <h4 class="points-heading">Adicionar evolução (ranking/RP)</h4>
+          <div class="profile-grid">
+            <label class="profile-field"><span>Data</span><input type="date" id="adm-evo-data"></label>
+            <label class="profile-field"><span>Posição</span><input type="number" id="adm-evo-rank" min="1"></label>
+            <label class="profile-field"><span>RP</span><input type="number" id="adm-evo-rp" min="0"></label>
+          </div>
+          <div class="profile-actions"><button onclick="admAdicionarEvolucao()">Adicionar</button></div>
+
+          <hr class="divider">
+          <h4 class="points-heading">Adicionar competição</h4>
+          <div class="profile-grid">
+            <label class="profile-field"><span>Campeonato</span><input type="text" id="adm-comp-nome"></label>
+            <label class="profile-field"><span>Data</span><input type="date" id="adm-comp-data"></label>
+            <label class="profile-field"><span>Colocação</span><input type="text" id="adm-comp-colocacao" placeholder="Ex: 1º"></label>
+            <label class="profile-field"><span>Pontuação</span><input type="text" id="adm-comp-pontos"></label>
+            <label class="profile-field profile-field-full"><span>Destaque</span><input type="text" id="adm-comp-destaque"></label>
+          </div>
+          <div class="profile-actions"><button onclick="admAdicionarCompeticao()">Adicionar</button></div>
+
+          <hr class="divider">
+          <h4 class="points-heading">Adicionar partida</h4>
+          <div class="profile-grid">
+            <label class="profile-field"><span>Adversário</span><input type="text" id="adm-partida-adv"></label>
+            <label class="profile-field">
+              <span>Resultado</span>
+              <select id="adm-partida-resultado">
+                <option>Vitória</option>
+                <option>Derrota</option>
+                <option>Empate</option>
+              </select>
+            </label>
+            <label class="profile-field">
+              <span>Tipo</span>
+              <select id="adm-partida-tipo">
+                <option>Burst</option>
+                <option>Survivor</option>
+                <option>Ring Out</option>
+              </select>
+            </label>
+            <label class="profile-field"><span>Bey usado</span><input type="text" id="adm-partida-bey"></label>
+            <label class="profile-field"><span>Data</span><input type="date" id="adm-partida-data"></label>
+          </div>
+          <div class="profile-actions"><button onclick="admAdicionarPartida()">Adicionar</button></div>
+        </div>
       </section>
     </main>
 
@@ -280,7 +307,6 @@
       </div>
     </footer>
   </div>
-
   <script src="script.js"></script>
 </body>
 </html>

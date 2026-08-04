@@ -14,7 +14,6 @@ async function verificarSessao() {
     const authScreen = document.getElementById("auth-screen");
     const app = document.getElementById("app");
 
-    // Perfil simples (profile-nickname) ou perfil completo (tela-criacao)
     const isPerfilSimples = !!document.getElementById("profile-nickname");
     const isPerfilCompleto = !!document.getElementById("tela-criacao");
     const isPerfilPage = isPerfilSimples || isPerfilCompleto;
@@ -35,7 +34,6 @@ async function verificarSessao() {
         return;
     }
 
-    // Ranking e outras páginas
     if (user) {
         if (authScreen) authScreen.style.display = "none";
         if (app) app.classList.remove("hidden");
@@ -60,7 +58,7 @@ async function login() {
     const senha = document.getElementById("senha").value.trim();
     const erro = document.getElementById("auth-erro");
     const { error } = await supabaseClient.auth.signInWithPassword({
-        email,
+        email: email,
         password: senha
     });
     if (error) {
@@ -76,7 +74,7 @@ async function registrar() {
     const senha = document.getElementById("senha").value.trim();
     const erro = document.getElementById("auth-erro");
     const { error } = await supabaseClient.auth.signUp({
-        email,
+        email: email,
         password: senha
     });
     if (error) {
@@ -101,22 +99,22 @@ async function logout() {
     if (erro) erro.textContent = "";
 }
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", function () {
     const senha = document.getElementById("senha");
     if (senha) {
-        senha.addEventListener("keydown", (e) => {
+        senha.addEventListener("keydown", function (e) {
             if (e.key === "Enter") login();
         });
     }
     verificarSessao();
 });
 
-window.addEventListener("pageshow", () => {
+window.addEventListener("pageshow", function () {
     verificarSessao();
 });
 
 // =============================================
-// DADOS PADRÃO / RANKING
+// RANKING
 // =============================================
 const playersPadrao = [
     { nome: "Cauê", rp: 453 },
@@ -129,6 +127,7 @@ const playersPadrao = [
 ];
 let players = [];
 let meuPerfil = null;
+let perfilAtualId = null;
 
 function getClassificacao(rp) {
     if (rp >= 4200) return { texto: "👑 Lendário", classe: "lendario" };
@@ -169,11 +168,11 @@ async function carregarPlayers() {
 }
 
 function renderizarTabela() {
-    players.sort((a, b) => b.rp - a.rp);
+    players.sort(function (a, b) { return b.rp - a.rp; });
     const tbody = document.getElementById("ranking-body");
     if (!tbody) return;
     tbody.innerHTML = "";
-    players.forEach((player, index) => {
+    players.forEach(function (player, index) {
         const posicao = index + 1;
         const classificacao = getClassificacao(player.rp);
         let rankClass = "";
@@ -181,22 +180,21 @@ function renderizarTabela() {
         else if (posicao === 2) rankClass = "silver";
         else if (posicao === 3) rankClass = "bronze";
         const tr = document.createElement("tr");
-        if (posicao <= 3) tr.classList.add(`rank-${posicao}`);
-        tr.innerHTML = `
-            <td><span class="rank-badge ${rankClass}">${posicao}</span></td>
-            <td class="blader-name">
-                <span class="nome-texto">${player.nome}</span>
-                <input class="edit-input nome admin-only" type="text" value="${player.nome}" data-id="${player.id}">
-            </td>
-            <td><span class="class-badge ${classificacao.classe}">${classificacao.texto}</span></td>
-            <td class="rp">
-                <span class="rp-texto">${player.rp}</span>
-                <input class="edit-input admin-only" type="number" value="${player.rp}" data-id="${player.id}">
-            </td>
-            <td class="admin-only">
-                <button class="btn-acao btn-excluir" onclick="excluirPlayer(${player.id}, '${player.nome}')">🗑️</button>
-            </td>
-        `;
+        if (posicao <= 3) tr.classList.add("rank-" + posicao);
+        tr.innerHTML =
+            '<td><span class="rank-badge ' + rankClass + '">' + posicao + "</span></td>" +
+            '<td class="blader-name">' +
+            '<span class="nome-texto">' + player.nome + "</span>" +
+            '<input class="edit-input nome admin-only" type="text" value="' + player.nome + '" data-id="' + player.id + '">' +
+            "</td>" +
+            '<td><span class="class-badge ' + classificacao.classe + '">' + classificacao.texto + "</span></td>" +
+            '<td class="rp">' +
+            '<span class="rp-texto">' + player.rp + "</span>" +
+            '<input class="edit-input admin-only" type="number" value="' + player.rp + '" data-id="' + player.id + '">' +
+            "</td>" +
+            '<td class="admin-only">' +
+            '<button class="btn-acao btn-excluir" onclick="excluirPlayer(' + player.id + ", '" + player.nome + "')\">🗑️</button>" +
+            "</td>";
         tbody.appendChild(tr);
     });
 }
@@ -206,6 +204,7 @@ function entrarAdmin() {
     if (senha === "ADM2008") {
         document.body.classList.add("admin-mode");
         alert("Modo Administrador ativado!");
+        if (document.getElementById("tela-criacao")) carregarPerfilPagina();
     } else if (senha !== null) {
         alert("Senha incorreta!");
     }
@@ -232,7 +231,7 @@ async function adicionarPlayer() {
 }
 
 async function excluirPlayer(id, nome) {
-    if (!confirm(`Tem certeza que deseja excluir ${nome}?`)) return;
+    if (!confirm("Tem certeza que deseja excluir " + nome + "?")) return;
     const { error } = await supabaseClient
         .from("players")
         .delete()
@@ -264,11 +263,11 @@ async function salvarTudo() {
 }
 
 // =====================================================
-// PERFIL SIMPLES (seu perfil.html atual)
+// PERFIL SIMPLES
 // =====================================================
 async function carregarPerfilSimples() {
     const { data: sessionData } = await supabaseClient.auth.getSession();
-    const user = sessionData.session?.user;
+    const user = sessionData.session && sessionData.session.user;
     if (!user) return;
 
     const emailEl = document.getElementById("profile-email");
@@ -289,11 +288,11 @@ async function carregarPerfilSimples() {
 
     meuPerfil = player || null;
 
-    const nome = player?.nome || "";
-    const bey = player?.bey_favorito || "";
-    const avatar = player?.avatar_url || "";
-    const accent = player?.accent_color || "#00b4ff";
-    const bio = player?.bio || "";
+    const nome = (player && player.nome) || "";
+    const bey = (player && player.bey_favorito) || "";
+    const avatar = (player && player.avatar_url) || "";
+    const accent = (player && player.accent_color) || "#00b4ff";
+    const bio = (player && player.bio) || "";
 
     const nick = document.getElementById("profile-nickname");
     const beyInput = document.getElementById("profile-favorite-bey");
@@ -309,13 +308,13 @@ async function carregarPerfilSimples() {
     if (colorInput) colorInput.value = accent;
     if (bioInput) bioInput.value = bio;
     if (displayName) displayName.textContent = nome || "Blader";
-    if (favLine) favLine.textContent = bey ? `Bey favorito: ${bey}` : "";
+    if (favLine) favLine.textContent = bey ? ("Bey favorito: " + bey) : "";
 
     const avatarBox = document.getElementById("profile-avatar-preview");
     const initials = document.getElementById("profile-avatar-initials");
     if (avatarBox && initials) {
         if (avatar) {
-            avatarBox.style.backgroundImage = `url(${avatar})`;
+            avatarBox.style.backgroundImage = "url(" + avatar + ")";
             avatarBox.classList.add("has-image");
             initials.style.display = "none";
         } else {
@@ -333,86 +332,253 @@ async function carregarPerfilSimples() {
 }
 
 async function salvarPerfil() {
-    const feedback = document.getElementById("profile-feedback");
+    const feedback = document.getElementById("profile-feedback") || document.getElementById("profile-feedback2");
     const { data: sessionData } = await supabaseClient.auth.getSession();
-    const user = sessionData.session?.user;
+    const user = sessionData.session && sessionData.session.user;
     if (!user) {
         if (feedback) feedback.textContent = "Faça login para salvar.";
         return;
     }
 
-    const nome = (document.getElementById("profile-nickname")?.value || "").trim();
-    const bey = (document.getElementById("profile-favorite-bey")?.value || "").trim();
-    const avatar = (document.getElementById("profile-avatar-url")?.value || "").trim();
-    const accent = document.getElementById("profile-accent-color")?.value || "#00b4ff";
-    const bio = (document.getElementById("profile-bio")?.value || "").trim();
+    const nickEl = document.getElementById("profile-nickname");
+    if (nickEl) {
+        const nome = nickEl.value.trim();
+        const bey = (document.getElementById("profile-favorite-bey") && document.getElementById("profile-favorite-bey").value || "").trim();
+        const avatar = (document.getElementById("profile-avatar-url") && document.getElementById("profile-avatar-url").value || "").trim();
+        const colorEl = document.getElementById("profile-accent-color");
+        const accent = (colorEl && colorEl.value) || "#00b4ff";
+        const bio = (document.getElementById("profile-bio") && document.getElementById("profile-bio").value || "").trim();
 
-    if (!nome) {
-        if (feedback) feedback.textContent = "Digite um apelido.";
+        if (!nome) {
+            if (feedback) feedback.textContent = "Digite um apelido.";
+            return;
+        }
+
+        const { data: existente } = await supabaseClient
+            .from("players")
+            .select("id")
+            .eq("user_id", user.id)
+            .maybeSingle();
+
+        let error = null;
+
+        if (existente) {
+            const result = await supabaseClient.from("players").update({
+                nome: nome,
+                bey_favorito: bey,
+                avatar_url: avatar,
+                accent_color: accent,
+                bio: bio
+            }).eq("id", existente.id);
+            error = result.error;
+        } else {
+            const { data: porNome } = await supabaseClient
+                .from("players")
+                .select("id")
+                .eq("nome", nome)
+                .is("user_id", null)
+                .maybeSingle();
+
+            if (porNome) {
+                const result = await supabaseClient.from("players").update({
+                    user_id: user.id,
+                    bey_favorito: bey,
+                    avatar_url: avatar,
+                    accent_color: accent,
+                    bio: bio
+                }).eq("id", porNome.id);
+                error = result.error;
+            } else {
+                const result = await supabaseClient.from("players").insert([{
+                    nome: nome,
+                    rp: 0,
+                    user_id: user.id,
+                    bey_favorito: bey,
+                    avatar_url: avatar,
+                    accent_color: accent,
+                    bio: bio
+                }]);
+                error = result.error;
+            }
+        }
+
+        if (error) {
+            if (feedback) feedback.textContent = "Erro: " + error.message;
+            return;
+        }
+        if (feedback) feedback.textContent = "Perfil salvo!";
+        await carregarPerfilSimples();
         return;
     }
 
-    // Já tem player vinculado a esta conta?
-    const { data: existente } = await supabaseClient
-        .from("players")
-        .select("id")
-        .eq("user_id", user.id)
-        .maybeSingle();
+    if (!meuPerfil) return;
+    const result = await supabaseClient.from("players").update({
+        bey_favorito: document.getElementById("profile-favorite-bey").value.trim(),
+        avatar_url: document.getElementById("profile-avatar-url").value.trim(),
+        accent_color: document.getElementById("profile-accent-color").value,
+        bio: document.getElementById("profile-bio").value.trim()
+    }).eq("id", meuPerfil.id);
+    if (result.error) {
+        if (feedback) feedback.textContent = "Erro: " + result.error.message;
+        return;
+    }
+    if (feedback) feedback.textContent = "Perfil salvo!";
+    if (typeof carregarPerfilPagina === "function") carregarPerfilPagina();
+}
 
-    let error;
-    if (existente) {
-        // Atualiza o que já existe (não cria duplicado)
-        ({ error } = await supabaseClient.from("players").update({
-            nome,
-            bey_favorito: bey,
-            avatar_url: avatar,
-            accent_color: accent,
-            bio
-        }).eq("id", existente.id));
-    } else {
-        // Tenta achar no ranking pelo mesmo nome (sem user_id) e vincular
-        const { data: porNome } = await supabaseClient
-            .from("players")
-            .select("id")
-            .eq("nome", nome)
-            .is("user_id", null)
-            .maybeSingle();
+async function recarregarPerfil() {
+    const feedback = document.getElementById("profile-feedback") || document.getElementById("profile-feedback2");
+    if (feedback) feedback.textContent = "Recarregando...";
 
-        if (porNome) {
-            // Vincula a conta ao perfil que já estava no ranking
-            ({ error } = await supabaseClient.from("players").update({
-                user_id: user.id,
-                bey_favorito: bey,
-                avatar_url: avatar,
-                accent_color: accent,
-                bio
-            }).eq("id", porNome.id));
+    if (document.getElementById("profile-nickname")) {
+        await carregarPerfilSimples();
+    } else if (typeof carregarPerfilPagina === "function") {
+        await carregarPerfilPagina();
+    }
+
+    if (feedback) feedback.textContent = "Perfil recarregado.";
+}
+
+// =====================================================
+// PERFIL COMPLETO (se usar a outra versão do HTML)
+// =====================================================
+async function carregarPerfilPagina() {
+    const { data: sessionData } = await supabaseClient.auth.getSession();
+    const usuarioAtual = sessionData.session && sessionData.session.user;
+    const params = new URLSearchParams(window.location.search);
+    const idParam = params.get("id");
+    const telaCriacao = document.getElementById("tela-criacao");
+    const telaPerfil = document.getElementById("tela-perfil");
+    const telaLogin = document.getElementById("tela-login-perfil");
+
+    if (telaCriacao) telaCriacao.classList.add("hidden");
+    if (telaPerfil) telaPerfil.classList.add("hidden");
+    if (telaLogin) telaLogin.classList.add("hidden");
+
+    let player = null;
+    if (idParam) {
+        const { data } = await supabaseClient.from("players").select("*").eq("id", idParam).maybeSingle();
+        player = data;
+    } else if (usuarioAtual) {
+        const { data } = await supabaseClient.from("players").select("*").eq("user_id", usuarioAtual.id).maybeSingle();
+        player = data;
+    }
+
+    if (document.body.classList.contains("admin-mode")) {
+        carregarSeletorAdmPerfil(player && player.id);
+    }
+
+    if (player) {
+        meuPerfil = player;
+        perfilAtualId = player.id;
+        if (telaPerfil) telaPerfil.classList.remove("hidden");
+        renderizarPerfilCompleto(player);
+        const souDono = usuarioAtual && player.user_id === usuarioAtual.id;
+        const edicao = document.getElementById("edicao-basica");
+        if (edicao) edicao.style.display = souDono ? "block" : "none";
+        return;
+    }
+
+    if (usuarioAtual) {
+        if (telaCriacao) telaCriacao.classList.remove("hidden");
+        return;
+    }
+
+    if (telaLogin) telaLogin.classList.remove("hidden");
+}
+
+async function carregarSeletorAdmPerfil(selectedId) {
+    const { data } = await supabaseClient.from("players").select("id,nome").order("nome");
+    const select = document.getElementById("admin-select-player");
+    if (!select) return;
+    select.innerHTML = (data || []).map(function (p) {
+        return '<option value="' + p.id + '">' + p.nome + "</option>";
+    }).join("");
+    if (selectedId) select.value = selectedId;
+    select.onchange = function () {
+        window.location.href = "perfil.html?id=" + select.value;
+    };
+}
+
+function rankPositionOf(id) {
+    const idx = players.findIndex(function (pl) { return pl.id === id; });
+    return idx === -1 ? null : idx + 1;
+}
+
+function escapeHTML(s) {
+    return (s || "").toString().replace(/[&<>"']/g, function (c) {
+        return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+}
+
+function barraHtml(nome, pct, classe) {
+    pct = pct || 0;
+    return '<div class="bar-row">' +
+        '<div class="name">' + nome + "</div>" +
+        '<div class="bar-track"><div class="bar-fill ' + classe + '" style="width:' + pct + '%"></div></div>' +
+        '<div class="pct">' + pct + "%</div>" +
+        "</div>";
+}
+
+function renderizarPerfilCompleto(p) {
+    if (!document.getElementById("profile-classificacao")) return;
+    const classe = getClassificacao(p.rp || 0);
+    document.getElementById("profile-classificacao").textContent = classe.texto;
+    document.getElementById("profile-display-name").textContent = p.nome;
+    const fav = document.getElementById("profile-favorite-line");
+    if (fav) fav.textContent = p.bey_favorito ? ("Bey favorito: " + p.bey_favorito) : "";
+    const bioLine = document.getElementById("profile-bio-line");
+    if (bioLine) bioLine.textContent = p.bio || "";
+
+    const avatarBox = document.getElementById("profile-avatar-preview");
+    const initials = document.getElementById("profile-avatar-initials");
+    if (avatarBox && initials) {
+        if (p.avatar_url) {
+            avatarBox.style.backgroundImage = "url(" + p.avatar_url + ")";
+            avatarBox.classList.add("has-image");
+            initials.style.display = "none";
         } else {
-            // Nome novo: cria entrada no ranking
-            ({ error } = await supabaseClient.from("players").insert([{
-                nome,
-                rp: 0,
-                user_id: user.id,
-                bey_favorito: bey,
-                avatar_url: avatar,
-                accent_color: accent,
-                bio
-            }]));
+            avatarBox.style.backgroundImage = "";
+            avatarBox.classList.remove("has-image");
+            initials.style.display = "block";
+            initials.textContent = (p.nome || "?")[0].toUpperCase();
         }
     }
 
+    const atr = p.atributos || { ataque: 50, defesa: 50, resistencia: 50 };
+    const barras = document.getElementById("barras-atributos");
+    if (barras) {
+        barras.innerHTML =
+            barraHtml("Ataque", atr.ataque, "attack") +
+            barraHtml("Defesa", atr.defesa, "defense") +
+            barraHtml("Resistência", atr.resistencia, "stamina");
+    }
+}
+
+async function criarMeuPerfil() {
+    const nomeEl = document.getElementById("criar-nome");
+    if (!nomeEl) return;
+    const nome = nomeEl.value.trim();
+    const feedback = document.getElementById("profile-feedback");
+    if (!nome) {
+        if (feedback) feedback.textContent = "Digite seu nome.";
+        return;
+    }
+    const { data: sessionData } = await supabaseClient.auth.getSession();
+    const user = sessionData.session && sessionData.session.user;
+    if (!user) return;
+    const { error } = await supabaseClient.from("players").insert([{
+        nome: nome,
+        rp: 0,
+        user_id: user.id,
+        bey_favorito: (document.getElementById("criar-bey") && document.getElementById("criar-bey").value || "").trim(),
+        estilo_batalha: (document.getElementById("criar-estilo") && document.getElementById("criar-estilo").value) || "",
+        avatar_url: (document.getElementById("criar-avatar") && document.getElementById("criar-avatar").value || "").trim(),
+        bio: (document.getElementById("criar-bio") && document.getElementById("criar-bio").value || "").trim()
+    }]);
     if (error) {
         if (feedback) feedback.textContent = "Erro: " + error.message;
         return;
     }
-
-    if (feedback) feedback.textContent = "Perfil salvo!";
-    await carregarPerfilSimples();
-}
-
-async function recarregarPerfil() {
-    const feedback = document.getElementById("profile-feedback");
-    if (feedback) feedback.textContent = "Recarregando...";
-    await carregarPerfilSimples();
-    if (feedback) feedback.textContent = "Perfil recarregado.";
+    window.location.href = "perfil.html";
 }

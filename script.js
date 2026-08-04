@@ -11,94 +11,39 @@ const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 async function verificarSessao() {
     const { data } = await supabaseClient.auth.getSession();
     const user = data.session?.user;
-
     const authScreen = document.getElementById("auth-screen");
     const app = document.getElementById("app");
+    const isPerfilPage = !!document.getElementById("tela-criacao");
 
+    // Na página de perfil: sempre mostra o app (perfil é público)
+    if (isPerfilPage) {
+        if (authScreen) authScreen.style.display = "none";
+        if (app) app.classList.remove("hidden");
+        await carregarPlayers();
+        await carregarPerfilPagina();
+        atualizarBotoesAuth(user);
+        return;
+    }
+
+    // Nas outras páginas (ranking etc.): mantém o login obrigatório
     if (user) {
         if (authScreen) authScreen.style.display = "none";
         if (app) app.classList.remove("hidden");
         await carregarPlayers();
-        if (document.getElementById("tela-criacao")) {
-            carregarPerfilPagina();
-        }
+        atualizarBotoesAuth(user);
     } else {
         if (authScreen) authScreen.style.display = "flex";
         if (app) app.classList.add("hidden");
+        atualizarBotoesAuth(null);
     }
 }
 
-async function login() {
-    const email = document.getElementById("email").value.trim();
-    const senha = document.getElementById("senha").value.trim();
-    const erro = document.getElementById("auth-erro");
-
-    const { error } = await supabaseClient.auth.signInWithPassword({
-        email,
-        password: senha
-    });
-
-    if (error) {
-        if (erro) erro.textContent = error.message;
-        return;
-    }
-
-    if (erro) erro.textContent = "";
-    verificarSessao();
+function atualizarBotoesAuth(user) {
+    const btnLogout = document.getElementById("btn-logout");
+    const btnLogin = document.getElementById("btn-login");
+    if (btnLogout) btnLogout.style.display = user ? "inline-block" : "none";
+    if (btnLogin) btnLogin.style.display = user ? "none" : "inline-block";
 }
-
-async function registrar() {
-    const email = document.getElementById("email").value.trim();
-    const senha = document.getElementById("senha").value.trim();
-    const erro = document.getElementById("auth-erro");
-
-    const { error } = await supabaseClient.auth.signUp({
-        email,
-        password: senha
-    });
-
-    if (error) {
-        if (erro) erro.textContent = error.message;
-        return;
-    }
-
-    if (erro) erro.textContent = "Conta criada. Verifique o e-mail se a confirmação estiver ativa.";
-}
-
-async function logout() {
-    await supabaseClient.auth.signOut();
-
-    const authScreen = document.getElementById("auth-screen");
-    const app = document.getElementById("app");
-
-    if (authScreen) authScreen.style.display = "flex";
-    if (app) app.classList.add("hidden");
-
-    const email = document.getElementById("email");
-    const senha = document.getElementById("senha");
-    const erro = document.getElementById("auth-erro");
-
-    if (email) email.value = "";
-    if (senha) senha.value = "";
-    if (erro) erro.textContent = "";
-}
-
-document.addEventListener("DOMContentLoaded", () => {
-    const senha = document.getElementById("senha");
-    if (senha) {
-        senha.addEventListener("keydown", (e) => {
-            if (e.key === "Enter") login();
-        });
-    }
-
-    verificarSessao();
-});
-
-// Ajuda quando você volta pelo botão do navegador e o site é restaurado do cache
-window.addEventListener("pageshow", () => {
-    verificarSessao();
-});
-
 // =============================================
 // DADOS PADRÃO
 // =============================================

@@ -15,13 +15,10 @@
     <div class="auth-card">
       <img src="logo.jpg" alt="LBS" class="auth-logo">
       <h2>Entrar</h2>
-
       <input type="email" id="email" placeholder="E-mail" autocomplete="email">
       <input type="password" id="senha" placeholder="Senha" autocomplete="current-password">
-
       <button onclick="login()">Entrar</button>
       <button class="secundario" onclick="registrar()">Criar conta</button>
-
       <p id="auth-erro" class="auth-erro"></p>
     </div>
   </div>
@@ -35,9 +32,7 @@
     </div>
 
     <header>
-      <div class="logo">
-        <img src="logo.jpg" alt="LBS" class="logo-img">
-      </div>
+      <div class="logo"><img src="logo.jpg" alt="LBS" class="logo-img"></div>
       <p class="subtitle">Classificação Oficial dos Bladers</p>
       <nav class="site-nav">
         <a href="index.html" class="nav-link">Ranking</a>
@@ -47,59 +42,233 @@
     </header>
 
     <main>
-      <section class="intro">
-        <p>Personalize seu perfil com apelido, bey favorito, foto e uma bio curta para deixar sua conta com a sua cara.</p>
+      <!-- Seletor de jogador, só aparece pro ADM -->
+      <section class="profile-page admin-only-block" id="admin-player-switch">
+        <div class="profile-card" style="padding:14px 20px;">
+          <label class="profile-field" style="max-width:340px;">
+            <span>Ver / editar perfil de:</span>
+            <select id="admin-select-player"></select>
+          </label>
+        </div>
       </section>
 
-      <section class="profile-page">
+      <!-- ======================= AINDA SEM PERFIL: aba de criação ======================= -->
+      <section class="profile-page" id="tela-criacao">
+        <div class="profile-card">
+          <p class="profile-kicker">Criação de perfil</p>
+          <h2 style="margin-bottom:14px;">Crie seu perfil de Blader</h2>
+          <p style="color:#a0aec0;margin-bottom:18px;">Isso também cria sua entrada no ranking.</p>
+
+          <div class="profile-grid">
+            <label class="profile-field">
+              <span>Nome / Apelido</span>
+              <input type="text" id="criar-nome" placeholder="Como você aparece no ranking">
+            </label>
+            <label class="profile-field">
+              <span>Bey favorito</span>
+              <input type="text" id="criar-bey" placeholder="Ex.: Variares, Dranzer...">
+            </label>
+            <label class="profile-field">
+              <span>Estilo de batalha</span>
+              <select id="criar-estilo">
+                <option value="">Selecione...</option>
+                <option>Ataque</option>
+                <option>Defesa</option>
+                <option>Resistência</option>
+                <option>Balance</option>
+              </select>
+            </label>
+            <label class="profile-field">
+              <span>Foto de perfil (URL)</span>
+              <input type="url" id="criar-avatar" placeholder="Cole o link da imagem">
+            </label>
+            <label class="profile-field profile-field-full">
+              <span>Bio</span>
+              <textarea id="criar-bio" rows="3" placeholder="Fale um pouco sobre você..."></textarea>
+            </label>
+          </div>
+
+          <div class="profile-actions">
+            <button id="btn-profile-save" onclick="criarMeuPerfil()">Criar perfil</button>
+          </div>
+          <p id="profile-feedback" class="profile-feedback"></p>
+        </div>
+      </section>
+
+      <!-- ======================= PERFIL COMPLETO ======================= -->
+      <section class="profile-page hidden" id="tela-perfil">
+
         <div class="profile-card">
           <div class="profile-preview">
             <div id="profile-avatar-preview" class="profile-avatar-preview">
               <span id="profile-avatar-initials">?</span>
             </div>
-
             <div class="profile-preview-text">
-              <p class="profile-kicker">Seu perfil</p>
+              <p class="profile-kicker" id="profile-classificacao">—</p>
               <h2 id="profile-display-name">Blader</h2>
-              <p id="profile-email" class="profile-email"></p>
               <p id="profile-favorite-line" class="profile-favorite-line"></p>
+              <p id="profile-bio-line" class="profile-favorite-line"></p>
             </div>
           </div>
 
+          <div class="stat-grid">
+            <div class="stat-box"><div class="value" id="stat-ranking">-</div><div class="label">Ranking</div></div>
+            <div class="stat-box"><div class="value" id="stat-rp">0</div><div class="label">RP</div></div>
+            <div class="stat-box"><div class="value" id="stat-vitorias">0</div><div class="label">Vitórias</div></div>
+            <div class="stat-box"><div class="value" id="stat-derrotas">0</div><div class="label">Derrotas</div></div>
+            <div class="stat-box"><div class="value" id="stat-taxa">0%</div><div class="label">Taxa de Vitória</div></div>
+          </div>
+        </div>
+
+        <div class="profile-card">
+          <h3 class="section-title">⭐ Atributos</h3>
+          <div id="barras-atributos"></div>
+        </div>
+
+        <div class="profile-card">
+          <h3 class="section-title">Relatório Técnico <span class="tag-adm">ADM</span></h3>
+          <div class="points-grid">
+            <div>
+              <h4 class="points-heading strong">✅ Pontos Fortes</h4>
+              <ul class="points-list strong" id="lista-fortes"></ul>
+            </div>
+            <div>
+              <h4 class="points-heading improve">📈 A Melhorar</h4>
+              <ul class="points-list improve" id="lista-melhorar"></ul>
+            </div>
+          </div>
+          <div class="tech-comment" id="comentario-tecnico"></div>
+        </div>
+
+        <div class="profile-card">
+          <h3 class="section-title">🎥 Melhores Momentos</h3>
+          <div id="lista-momentos"></div>
+        </div>
+
+        <div class="profile-card">
+          <h3 class="section-title">🏅 Conquistas</h3>
+          <div class="badges" id="lista-conquistas"></div>
+        </div>
+
+        <div class="profile-card">
+          <h3 class="section-title">📜 Histórico</h3>
+          <div class="timeline" id="timeline-historico"></div>
+        </div>
+
+        <!-- Edição de dados básicos (só o dono edita) -->
+        <div class="profile-card" id="edicao-basica">
+          <h3 class="section-title">Editar meus dados</h3>
           <div class="profile-grid">
             <label class="profile-field">
-              <span>Apelido</span>
-              <input type="text" id="profile-nickname" placeholder="Seu apelido">
-            </label>
-
-            <label class="profile-field">
               <span>Bey favorito</span>
-              <input type="text" id="profile-favorite-bey" placeholder="Ex.: Variares, Dranzer...">
+              <input type="text" id="profile-favorite-bey">
             </label>
-
             <label class="profile-field">
               <span>Foto de perfil (URL)</span>
-              <input type="url" id="profile-avatar-url" placeholder="Cole o link da imagem">
+              <input type="url" id="profile-avatar-url">
             </label>
-
             <label class="profile-field">
               <span>Cor de destaque</span>
               <input type="color" id="profile-accent-color" value="#00b4ff">
             </label>
-
             <label class="profile-field profile-field-full">
               <span>Bio</span>
-              <textarea id="profile-bio" rows="4" placeholder="Fale um pouco sobre você..."></textarea>
+              <textarea id="profile-bio" rows="3"></textarea>
+            </label>
+          </div>
+          <div class="profile-actions">
+            <button id="btn-profile-save2" onclick="salvarPerfil()">Salvar</button>
+          </div>
+          <p id="profile-feedback2" class="profile-feedback"></p>
+        </div>
+
+        <!-- Painel do ADM: só aparece em admin-mode -->
+        <div class="profile-card admin-only-block" id="painel-adm-perfil">
+          <h3 class="section-title" style="color:#ff6b00;">Painel do Administrador</h3>
+
+          <label class="profile-field">
+            <span>Vitórias</span>
+            <input type="number" id="adm-vitorias" min="0">
+          </label>
+          <label class="profile-field">
+            <span>Derrotas</span>
+            <input type="number" id="adm-derrotas" min="0">
+          </label>
+
+          <label class="profile-field">
+            <span>Pontos fortes (um por linha)</span>
+            <textarea id="adm-fortes" rows="4"></textarea>
+          </label>
+          <label class="profile-field">
+            <span>Pontos a melhorar (um por linha)</span>
+            <textarea id="adm-melhorar" rows="4"></textarea>
+          </label>
+          <label class="profile-field">
+            <span>Comentário técnico</span>
+            <textarea id="adm-comentario" rows="3"></textarea>
+          </label>
+
+          <div class="profile-grid">
+            <label class="profile-field">
+              <span>Ataque (%)</span>
+              <input type="number" id="adm-ataque" min="0" max="100">
+            </label>
+            <label class="profile-field">
+              <span>Defesa (%)</span>
+              <input type="number" id="adm-defesa" min="0" max="100">
+            </label>
+            <label class="profile-field">
+              <span>Resistência (%)</span>
+              <input type="number" id="adm-resistencia" min="0" max="100">
             </label>
           </div>
 
           <div class="profile-actions">
-            <button id="btn-profile-save" onclick="salvarPerfil()">Salvar perfil</button>
-            <button id="btn-profile-reset" onclick="recarregarPerfil()">Recarregar</button>
+            <button id="btn-salvar-analise" onclick="salvarAnaliseAdm()">Salvar análise</button>
           </div>
 
-          <p id="profile-feedback" class="profile-feedback"></p>
+          <hr class="divider">
+
+          <h4 class="points-heading">Adicionar conquista</h4>
+          <div class="profile-grid">
+            <label class="profile-field">
+              <span>Nome da conquista</span>
+              <input type="text" id="adm-nova-conquista" placeholder="Ex: Ring Out Master">
+            </label>
+          </div>
+          <div class="profile-actions"><button onclick="admAdicionarConquista()">Adicionar</button></div>
+
+          <hr class="divider">
+
+          <h4 class="points-heading">Adicionar item ao histórico</h4>
+          <div class="profile-grid">
+            <label class="profile-field">
+              <span>Descrição</span>
+              <input type="text" id="adm-historico-desc" placeholder="Ex: 1º Lugar - Campeonato de Julho">
+            </label>
+          </div>
+          <div class="profile-actions"><button onclick="admAdicionarHistorico()">Adicionar</button></div>
+
+          <hr class="divider">
+
+          <h4 class="points-heading">Adicionar Melhor Momento</h4>
+          <div class="profile-grid">
+            <label class="profile-field">
+              <span>Título</span>
+              <input type="text" id="adm-momento-titulo" placeholder="Ex: Burst Finish contra João">
+            </label>
+            <label class="profile-field">
+              <span>URL do vídeo (.mp4)</span>
+              <input type="url" id="adm-momento-url" placeholder="https://.../clipe.mp4">
+            </label>
+            <label class="profile-field profile-field-full">
+              <span>Legenda</span>
+              <input type="text" id="adm-momento-legenda" placeholder="Ex: A melhor jogada do campeonato.">
+            </label>
+          </div>
+          <div class="profile-actions"><button onclick="admAdicionarMomento()">Adicionar</button></div>
         </div>
+
       </section>
     </main>
 

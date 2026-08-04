@@ -752,3 +752,127 @@ footer {
         width: 54px;
     }
 }
+/* =====================================================
+   ADIÇÕES PARA O PERFIL COMPLETO
+   Cole isso no final do style.css existente
+   ===================================================== */
+
+/* admin-only-block: mesmo conceito do .admin-only já existente,
+   mas pra elementos em bloco (divs), não células de tabela */
+.admin-only-block { display: none; }
+body.admin-mode .admin-only-block { display: block; }
+
+.section-title {
+    font-size: 1rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: #a0aec0;
+    border-bottom: 1px solid #1e293b;
+    padding-bottom: 10px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.tag-adm {
+    font-size: 0.7rem;
+    padding: 2px 8px;
+    border-radius: 4px;
+    background: rgba(255, 107, 0, 0.15);
+    color: #ff6b00;
+    letter-spacing: 1px;
+    margin-left: auto;
+}
+
+/* Stats */
+.stat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    gap: 12px;
+    margin-top: 18px;
+}
+.stat-box {
+    background: #0f172a;
+    border: 1px solid #1e293b;
+    border-radius: 12px;
+    padding: 12px;
+    text-align: center;
+}
+.stat-box .value { font-size: 1.4rem; font-weight: 800; color: var(--accent); }
+.stat-box .label { font-size: 0.75rem; color: #a0aec0; text-transform: uppercase; letter-spacing: 1px; }
+
+/* Barras de atributo */
+.bar-row { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+.bar-row .name { width: 100px; font-size: 0.85rem; color: #a0aec0; flex-shrink: 0; }
+.bar-track { flex: 1; height: 9px; background: #1e293b; border-radius: 5px; overflow: hidden; }
+.bar-fill { height: 100%; border-radius: 5px; }
+.bar-fill.attack { background: #ff4d4d; }
+.bar-fill.defense { background: #2979ff; }
+.bar-fill.stamina { background: #00c853; }
+.bar-row .pct { width: 38px; text-align: right; font-size: 0.8rem; color: #a0aec0; }
+
+/* Pontos fortes / a melhorar */
+.points-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+@media (max-width: 700px) { .points-grid { grid-template-columns: 1fr; } }
+.points-heading { font-size: 0.85rem; margin-bottom: 8px; }
+.points-heading.strong { color: #00c853; }
+.points-heading.improve { color: #ff6b00; }
+.points-list { list-style: none; padding: 0; margin: 0; }
+.points-list li {
+    padding: 8px 0 8px 22px;
+    position: relative;
+    font-size: 0.92rem;
+    border-bottom: 1px solid #1e293b;
+    color: #e2e8f0;
+}
+.points-list li:last-child { border-bottom: none; }
+.points-list.strong li::before { content: "✓"; position: absolute; left: 0; color: #00c853; }
+.points-list.improve li::before { content: "→"; position: absolute; left: 0; color: #ff6b00; }
+
+.tech-comment {
+    background: #0f172a;
+    border-left: 3px solid var(--accent);
+    padding: 14px 16px;
+    font-size: 0.92rem;
+    font-style: italic;
+    color: #cbd5e1;
+    border-radius: 0 10px 10px 0;
+    margin-top: 18px;
+}
+
+/* Conquistas */
+.badges { display: flex; flex-wrap: wrap; gap: 10px; }
+.badge {
+    background: #0f172a;
+    border: 1px solid #ffc10740;
+    color: #ffc107;
+    border-radius: 20px;
+    padding: 6px 14px;
+    font-size: 0.82rem;
+}
+
+/* Timeline */
+.timeline { border-left: 2px solid #1e293b; margin-left: 6px; padding-left: 20px; }
+.timeline .entry { margin-bottom: 16px; position: relative; }
+.timeline .entry::before {
+    content: ""; position: absolute; left: -25px; top: 4px;
+    width: 10px; height: 10px; border-radius: 50%;
+    background: var(--accent); border: 2px solid #12182b;
+}
+.timeline .date { font-size: 0.72rem; color: #a0aec0; text-transform: uppercase; letter-spacing: 1px; }
+.timeline .desc { font-size: 0.92rem; margin-top: 2px; color: #e2e8f0; }
+
+/* Vídeos / Melhores Momentos */
+.momento-item { margin-bottom: 22px; }
+.momento-item h4 { font-size: 0.95rem; margin-bottom: 8px; color: #fff; }
+.video-embed {
+    aspect-ratio: 16/9; width: 100%; border-radius: 10px; overflow: hidden;
+    border: 1px solid #1e293b; background: #000;
+}
+.video-embed video { width: 100%; height: 100%; }
+.video-caption { font-size: 0.85rem; color: #a0aec0; margin-top: 8px; font-style: italic; }
+
+.divider { border: none; border-top: 1px solid #1e293b; margin: 20px 0; }
+
+.empty-hint { color: #64748b; font-size: 0.9rem; }

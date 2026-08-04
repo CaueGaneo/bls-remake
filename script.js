@@ -15,7 +15,7 @@ async function verificarSessao() {
     const app = document.getElementById("app");
     const isPerfilPage = !!document.getElementById("tela-criacao");
 
-    // Na página de perfil: sempre mostra o app (perfil é público)
+    // Página de perfil: sempre pública
     if (isPerfilPage) {
         if (authScreen) authScreen.style.display = "none";
         if (app) app.classList.remove("hidden");
@@ -25,7 +25,7 @@ async function verificarSessao() {
         return;
     }
 
-    // Nas outras páginas (ranking etc.): mantém o login obrigatório
+    // Ranking e outras páginas: login obrigatório
     if (user) {
         if (authScreen) authScreen.style.display = "none";
         if (app) app.classList.remove("hidden");
@@ -44,6 +44,111 @@ function atualizarBotoesAuth(user) {
     if (btnLogout) btnLogout.style.display = user ? "inline-block" : "none";
     if (btnLogin) btnLogin.style.display = user ? "none" : "inline-block";
 }
+
+async function login() {
+    const email = document.getElementById("email").value.trim();
+    const senha = document.getElementById("senha").value.trim();
+    const erro = document.getElementById("auth-erro");
+    const { error } = await supabaseClient.auth.signInWithPassword({
+        email,
+        password: senha
+    });
+    if (error) {
+        if (erro) erro.textContent = error.message;
+        return;
+    }
+    if (erro) erro.textContent = "";
+    verificarSessao();
+}
+
+async function registrar() {
+    const email = document.getElementById("email").value.trim();
+    const senha = document.getElementById("senha").value.trim();
+    const erro = document.getElementById("auth-erro");
+    const { error } = await supabaseClient.auth.signUp({
+        email,
+        password: senha
+    });
+    if (error) {
+        if (erro) erro.textContent = error.message;
+        return;
+    }
+    if (erro) erro.textContent = "Conta criada. Verifique o e-mail se a confirmação estiver ativa.";
+}
+
+async function logout() {
+    await supabaseClient.auth.signOut();
+    const isPerfilPage = !!document.getElementById("tela-criacao");
+
+    if (isPerfilPage) {
+        document.body.classList.remove("admin-mode");
+        await verificarSessao();
+        return;
+    }
+
+    const authScreen = document.getElementById("auth-screen");
+    const app = document.getElementById("app");
+    if (authScreen) authScreen.style.display = "flex";
+    if (app) app.classList.add("hidden");
+
+    const email = document.getElementById("email");
+    const senha = document.getElementById("senha");
+    const erro = document.getElementById("auth-erro");
+    if (email) email.value = "";
+    if (senha) senha.value = "";
+    if (erro) erro.textContent = "";
+}
+
+function mostrarLoginPerfil() {
+    const telaLogin = document.getElementById("tela-login-perfil");
+    const telaCriacao = document.getElementById("tela-criacao");
+    const telaPerfil = document.getElementById("tela-perfil");
+    if (telaCriacao) telaCriacao.classList.add("hidden");
+    if (telaPerfil) telaPerfil.classList.add("hidden");
+    if (telaLogin) telaLogin.classList.remove("hidden");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+async function loginPelaPaginaPerfil() {
+    const email = document.getElementById("perfil-email").value.trim();
+    const senha = document.getElementById("perfil-senha").value.trim();
+    const erro = document.getElementById("perfil-auth-erro");
+    const { error } = await supabaseClient.auth.signInWithPassword({ email, password: senha });
+    if (error) {
+        if (erro) erro.textContent = error.message;
+        return;
+    }
+    if (erro) erro.textContent = "";
+    await verificarSessao();
+}
+
+async function registrarPelaPaginaPerfil() {
+    const email = document.getElementById("perfil-email").value.trim();
+    const senha = document.getElementById("perfil-senha").value.trim();
+    const erro = document.getElementById("perfil-auth-erro");
+    const { error } = await supabaseClient.auth.signUp({ email, password: senha });
+    if (error) {
+        if (erro) erro.textContent = error.message;
+        return;
+    }
+    if (erro) erro.textContent = "Conta criada! Se precisar confirmar o e-mail, verifique sua caixa de entrada. Depois faça login.";
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    const senha = document.getElementById("senha");
+    if (senha) {
+        senha.addEventListener("keydown", (e) => {
+            if (e.key === "Enter") login();
+        });
+    }
+    verificarSessao();
+});
+
+// Ajuda quando você volta pelo botão do navegador e o site é restaurado do cache
+window.addEventListener("pageshow", () => {
+    verificarSessao();
+});
+
 // =============================================
 // DADOS PADRÃO
 // =============================================
@@ -56,7 +161,6 @@ const playersPadrao = [
     { nome: "Mickey", rp: 156 },
     { nome: "Rafa", rp: 6 }
 ];
-
 let players = [];
 
 // Calcula a classificação pelo RP
@@ -66,10 +170,10 @@ function getClassificacao(rp) {
     if (rp >= 2300) return { texto: "🔹 Safira", classe: "safira" };
     if (rp >= 1650) return { texto: "💎 Diamante", classe: "diamante" };
     if (rp >= 1150) return { texto: "🔷 Platina", classe: "platina" };
-    if (rp >= 750)  return { texto: "🟡 Ouro", classe: "ouro" };
-    if (rp >= 450)  return { texto: "🥈 Prata", classe: "prata" };
-    if (rp >= 250)  return { texto: "⚪ Ferro", classe: "ferro" };
-    if (rp >= 100)  return { texto: "🟠 Cobre", classe: "cobre" };
+    if (rp >= 750) return { texto: "🟡 Ouro", classe: "ouro" };
+    if (rp >= 450) return { texto: "🥈 Prata", classe: "prata" };
+    if (rp >= 250) return { texto: "⚪ Ferro", classe: "ferro" };
+    if (rp >= 100) return { texto: "🟠 Cobre", classe: "cobre" };
     return { texto: "🟤 Bronze", classe: "bronze-class" };
 }
 
@@ -79,27 +183,22 @@ async function carregarPlayers() {
         .from("players")
         .select("*")
         .order("rp", { ascending: false });
-
     if (error) {
         console.error("Erro ao carregar:", error);
         alert("Erro ao carregar o ranking: " + error.message);
         return;
     }
-
     if (!data || data.length === 0) {
         const { error: insertError } = await supabaseClient
             .from("players")
             .insert(playersPadrao);
-
         if (insertError) {
             console.error("Erro ao inserir dados iniciais:", insertError);
             alert("Erro ao criar ranking inicial: " + insertError.message);
             return;
         }
-
         return carregarPlayers();
     }
-
     players = data;
     renderizarTabela();
 }
@@ -107,24 +206,18 @@ async function carregarPlayers() {
 // Desenha a tabela na tela
 function renderizarTabela() {
     players.sort((a, b) => b.rp - a.rp);
-
     const tbody = document.getElementById("ranking-body");
     if (!tbody) return;
-
     tbody.innerHTML = "";
-
     players.forEach((player, index) => {
         const posicao = index + 1;
         const classificacao = getClassificacao(player.rp);
-
         let rankClass = "";
         if (posicao === 1) rankClass = "gold";
         else if (posicao === 2) rankClass = "silver";
         else if (posicao === 3) rankClass = "bronze";
-
         const tr = document.createElement("tr");
         if (posicao <= 3) tr.classList.add(`rank-${posicao}`);
-
         tr.innerHTML = `
             <td><span class="rank-badge ${rankClass}">${posicao}</span></td>
             <td class="blader-name">
@@ -163,14 +256,11 @@ function sairAdmin() {
 async function adicionarPlayer() {
     const nome = prompt("Nome do novo player:");
     if (!nome) return;
-
     const rp = prompt("RP inicial do player:", "0");
     if (rp === null) return;
-
     const { error } = await supabaseClient
         .from("players")
         .insert([{ nome: nome.trim(), rp: Number(rp) || 0 }]);
-
     if (error) {
         alert("Erro ao adicionar player: " + error.message);
     } else {
@@ -181,12 +271,10 @@ async function adicionarPlayer() {
 
 async function excluirPlayer(id, nome) {
     if (!confirm(`Tem certeza que deseja excluir ${nome}?`)) return;
-
     const { error } = await supabaseClient
         .from("players")
         .delete()
         .eq("id", id);
-
     if (error) {
         alert("Erro ao excluir: " + error.message);
     } else {
@@ -197,7 +285,6 @@ async function excluirPlayer(id, nome) {
 async function salvarTudo() {
     const inputsNome = document.querySelectorAll(".edit-input.nome");
     const inputsRP = document.querySelectorAll(".edit-input[type='number']");
-
     for (const input of inputsNome) {
         const id = input.dataset.id;
         const novoNome = input.value.trim();
@@ -205,13 +292,11 @@ async function salvarTudo() {
             await supabaseClient.from("players").update({ nome: novoNome }).eq("id", id);
         }
     }
-
     for (const input of inputsRP) {
         const id = input.dataset.id;
         const novoRP = Number(input.value) || 0;
         await supabaseClient.from("players").update({ rp: novoRP }).eq("id", id);
     }
-
     alert("Alterações salvas com sucesso!");
     carregarPlayers();
 }
@@ -219,24 +304,30 @@ async function salvarTudo() {
 // =====================================================
 // PERFIL COMPLETO (perfil.html)
 // =====================================================
-
 let meuPerfil = null;
 let perfilAtualId = null;
 
 async function carregarPerfilPagina() {
     const { data: sessionData } = await supabaseClient.auth.getSession();
     const usuarioAtual = sessionData.session?.user;
-    if (!usuarioAtual) return;
 
     const params = new URLSearchParams(window.location.search);
     const idParam = params.get("id");
+
+    const telaCriacao = document.getElementById("tela-criacao");
+    const telaPerfil = document.getElementById("tela-perfil");
+    const telaLogin = document.getElementById("tela-login-perfil");
+
+    if (telaCriacao) telaCriacao.classList.add("hidden");
+    if (telaPerfil) telaPerfil.classList.add("hidden");
+    if (telaLogin) telaLogin.classList.add("hidden");
 
     let player = null;
 
     if (idParam) {
         const { data } = await supabaseClient.from("players").select("*").eq("id", idParam).maybeSingle();
         player = data;
-    } else {
+    } else if (usuarioAtual) {
         const { data } = await supabaseClient.from("players").select("*").eq("user_id", usuarioAtual.id).maybeSingle();
         player = data;
     }
@@ -245,23 +336,24 @@ async function carregarPerfilPagina() {
         carregarSeletorAdmPerfil(player?.id);
     }
 
-    const telaCriacao = document.getElementById("tela-criacao");
-    const telaPerfil = document.getElementById("tela-perfil");
+    if (player) {
+        meuPerfil = player;
+        perfilAtualId = player.id;
+        if (telaPerfil) telaPerfil.classList.remove("hidden");
+        renderizarPerfilCompleto(player);
 
-    if (!player) {
-        telaCriacao.classList.remove("hidden");
-        telaPerfil.classList.add("hidden");
+        const souDono = usuarioAtual && player.user_id === usuarioAtual.id;
+        const edicao = document.getElementById("edicao-basica");
+        if (edicao) edicao.style.display = souDono ? "block" : "none";
         return;
     }
 
-    meuPerfil = player;
-    perfilAtualId = player.id;
-    telaCriacao.classList.add("hidden");
-    telaPerfil.classList.remove("hidden");
-    renderizarPerfilCompleto(player);
+    if (usuarioAtual) {
+        if (telaCriacao) telaCriacao.classList.remove("hidden");
+        return;
+    }
 
-    const souDono = player.user_id === usuarioAtual.id;
-    document.getElementById("edicao-basica").style.display = souDono ? "block" : "none";
+    if (telaLogin) telaLogin.classList.remove("hidden");
 }
 
 async function carregarSeletorAdmPerfil(selectedId) {
@@ -284,7 +376,6 @@ function renderizarPerfilCompleto(p) {
     document.getElementById("profile-display-name").textContent = p.nome;
     document.getElementById("profile-favorite-line").textContent = p.bey_favorito ? `Bey favorito: ${p.bey_favorito}` : "";
     document.getElementById("profile-bio-line").textContent = p.bio || "";
-
     const avatarBox = document.getElementById("profile-avatar-preview");
     const initials = document.getElementById("profile-avatar-initials");
     if (p.avatar_url) {
@@ -297,20 +388,17 @@ function renderizarPerfilCompleto(p) {
         initials.style.display = "block";
         initials.textContent = (p.nome || "?")[0].toUpperCase();
     }
-
     document.getElementById("stat-ranking").textContent = "#" + (rankPositionOf(p.id) ?? "-");
     document.getElementById("stat-rp").textContent = p.rp ?? 0;
     document.getElementById("stat-vitorias").textContent = p.vitorias ?? 0;
     document.getElementById("stat-derrotas").textContent = p.derrotas ?? 0;
     const v = p.vitorias || 0, d = p.derrotas || 0;
     document.getElementById("stat-taxa").textContent = (v + d) === 0 ? "0%" : Math.round((v / (v + d)) * 100) + "%";
-
     const atr = p.atributos || { ataque: 50, defesa: 50, resistencia: 50 };
     document.getElementById("barras-atributos").innerHTML =
         barraHtml("Ataque", atr.ataque, "attack") +
         barraHtml("Defesa", atr.defesa, "defense") +
         barraHtml("Resistência", atr.resistencia, "stamina");
-
     document.getElementById("lista-fortes").innerHTML =
         (p.pontos_fortes || []).map(x => `<li>${escapeHTML(x)}</li>`).join("") ||
         '<li class="empty-hint">Ainda sem avaliação</li>';
@@ -319,7 +407,6 @@ function renderizarPerfilCompleto(p) {
         '<li class="empty-hint">Ainda sem avaliação</li>';
     document.getElementById("comentario-tecnico").textContent =
         p.comentario_tecnico ? `"${p.comentario_tecnico}"` : "Ainda sem comentário técnico do ADM.";
-
     document.getElementById("lista-momentos").innerHTML =
         (p.melhores_momentos || []).map(m => `
             <div class="momento-item">
@@ -328,11 +415,9 @@ function renderizarPerfilCompleto(p) {
                 <p class="video-caption">${escapeHTML(m.legenda || "")}</p>
             </div>
         `).join("") || '<p class="empty-hint">Nenhum momento adicionado ainda.</p>';
-
     document.getElementById("lista-conquistas").innerHTML =
         (p.conquistas || []).map(c => `<span class="badge">🏆 ${escapeHTML(c)}</span>`).join("") ||
         '<p class="empty-hint">Nenhuma conquista ainda.</p>';
-
     document.getElementById("timeline-historico").innerHTML =
         (p.historico || []).slice().reverse().map(h => `
             <div class="entry">
@@ -340,12 +425,10 @@ function renderizarPerfilCompleto(p) {
                 <div class="desc">${escapeHTML(h.descricao)}</div>
             </div>
         `).join("") || '<p class="empty-hint">Sem histórico ainda.</p>';
-
     document.getElementById("profile-favorite-bey").value = p.bey_favorito || "";
     document.getElementById("profile-avatar-url").value = p.avatar_url || "";
     document.getElementById("profile-accent-color").value = p.accent_color || "#00b4ff";
     document.getElementById("profile-bio").value = p.bio || "";
-
     if (document.body.classList.contains("admin-mode")) {
         document.getElementById("adm-vitorias").value = p.vitorias ?? 0;
         document.getElementById("adm-derrotas").value = p.derrotas ?? 0;
@@ -375,11 +458,9 @@ async function criarMeuPerfil() {
     const nome = document.getElementById("criar-nome").value.trim();
     const feedback = document.getElementById("profile-feedback");
     if (!nome) { feedback.textContent = "Digite seu nome."; return; }
-
     const { data: sessionData } = await supabaseClient.auth.getSession();
     const user = sessionData.session?.user;
     if (!user) return;
-
     const { error } = await supabaseClient.from("players").insert([{
         nome,
         rp: 0,
@@ -389,7 +470,6 @@ async function criarMeuPerfil() {
         avatar_url: document.getElementById("criar-avatar").value.trim(),
         bio: document.getElementById("criar-bio").value.trim()
     }]);
-
     if (error) { feedback.textContent = "Erro: " + error.message; return; }
     window.location.href = "perfil.html";
 }
@@ -397,14 +477,12 @@ async function criarMeuPerfil() {
 async function salvarPerfil() {
     if (!meuPerfil) return;
     const feedback = document.getElementById("profile-feedback2");
-
     const { error } = await supabaseClient.from("players").update({
         bey_favorito: document.getElementById("profile-favorite-bey").value.trim(),
         avatar_url: document.getElementById("profile-avatar-url").value.trim(),
         accent_color: document.getElementById("profile-accent-color").value,
         bio: document.getElementById("profile-bio").value.trim()
     }).eq("id", meuPerfil.id);
-
     if (error) { feedback.textContent = "Erro: " + error.message; return; }
     feedback.textContent = "Perfil salvo!";
     carregarPerfilPagina();
@@ -414,7 +492,6 @@ async function salvarAnaliseAdm() {
     if (!perfilAtualId) return;
     const pontosFortes = document.getElementById("adm-fortes").value.split("\n").map(s => s.trim()).filter(Boolean);
     const pontosMelhorar = document.getElementById("adm-melhorar").value.split("\n").map(s => s.trim()).filter(Boolean);
-
     const { error } = await supabaseClient.from("players").update({
         vitorias: Number(document.getElementById("adm-vitorias").value) || 0,
         derrotas: Number(document.getElementById("adm-derrotas").value) || 0,
@@ -427,7 +504,6 @@ async function salvarAnaliseAdm() {
             resistencia: Number(document.getElementById("adm-resistencia").value) || 0
         }
     }).eq("id", perfilAtualId);
-
     if (error) { alert("Erro: " + error.message); return; }
     alert("Análise salva!");
     carregarPerfilPagina();

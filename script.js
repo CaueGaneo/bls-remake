@@ -5,6 +5,10 @@ const SUPABASE_URL = "https://mvvktemmkzzmaqqgmnpo.supabase.co";
 const SUPABASE_KEY = "sb_publishable_hN9NakLX5Vb27LmTuBcevg_rrd7it0p";
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+// E-mail com permissão de ADM. O botão ADM só aparece pra essa conta.
+const ADMIN_EMAIL = "cauee08@gmail.com";
+let isAdmin = false;
+
 // =============================================
 // AUTENTICAÇÃO
 // =============================================
@@ -14,6 +18,11 @@ async function verificarSessao() {
 
     const authScreen = document.getElementById("auth-screen");
     const app = document.getElementById("app");
+
+    isAdmin = (user?.email || "").toLowerCase() === ADMIN_EMAIL;
+    const btnAdm = document.getElementById("btn-adm");
+    if (btnAdm) btnAdm.classList.toggle("hidden", !isAdmin);
+    if (!isAdmin) document.body.classList.remove("admin-mode");
 
     if (user) {
         if (authScreen) authScreen.style.display = "none";
@@ -199,16 +208,12 @@ function renderizarTabela() {
     });
 }
 
-// Modo ADM
+// Modo ADM — só a conta ADMIN_EMAIL enxerga e consegue clicar no botão,
+// então basta o clique pra ligar/desligar o modo, sem senha.
 function entrarAdmin() {
-    const senha = prompt("Digite a senha de Administrador:");
-    if (senha === "ADM2008") {
-        document.body.classList.add("admin-mode");
-        alert("Modo Administrador ativado!");
-        if (document.getElementById("tela-criacao")) carregarPerfilPagina();
-    } else if (senha !== null) {
-        alert("Senha incorreta!");
-    }
+    if (!isAdmin) return;
+    document.body.classList.toggle("admin-mode");
+    if (document.getElementById("tela-criacao")) carregarPerfilPagina();
 }
 
 function sairAdmin() {
@@ -392,6 +397,14 @@ function barraHtml(nome, pct, classe) {
 }
 
 function renderizarPerfilCompleto(p) {
+    // Fecha qualquer edição inline aberta (ex: admin trocou de jogador no meio da edição)
+    ["comentario", "fortes", "melhorar"].forEach(id => {
+        document.getElementById(`edit-${id}`)?.classList.add("hidden");
+    });
+    document.getElementById("comentario-tecnico")?.classList.remove("hidden");
+    document.getElementById("lista-fortes")?.classList.remove("hidden");
+    document.getElementById("lista-melhorar")?.classList.remove("hidden");
+
     const classe = getClassificacao(p.rp || 0);
     document.getElementById("profile-classificacao").textContent = classe.texto;
     document.getElementById("profile-display-name").textContent = p.nome || "Blader";
@@ -553,6 +566,66 @@ async function salvarTudoAdm() {
     if (error) { alert("Erro: " + error.message); return; }
     alert("Salvo!");
     carregarPlayers();
+    carregarPerfilPagina();
+}
+
+// =====================================================
+// EDIÇÃO INLINE — Relatório técnico / Pontos fortes / A melhorar
+// =====================================================
+function editarComentario() {
+    if (!perfilAtualId) return;
+    document.getElementById("input-comentario").value = meuPerfil?.comentario_tecnico || "";
+    document.getElementById("comentario-tecnico").classList.add("hidden");
+    document.getElementById("edit-comentario").classList.remove("hidden");
+}
+
+function cancelarComentario() {
+    document.getElementById("edit-comentario").classList.add("hidden");
+    document.getElementById("comentario-tecnico").classList.remove("hidden");
+}
+
+async function salvarComentario() {
+    const valor = document.getElementById("input-comentario").value.trim();
+    const { error } = await supabaseClient.from("players").update({ comentario_tecnico: valor }).eq("id", perfilAtualId);
+    if (error) { alert("Erro: " + error.message); return; }
+    carregarPerfilPagina();
+}
+
+function editarFortes() {
+    if (!perfilAtualId) return;
+    document.getElementById("input-fortes").value = (meuPerfil?.pontos_fortes || []).join("\n");
+    document.getElementById("lista-fortes").classList.add("hidden");
+    document.getElementById("edit-fortes").classList.remove("hidden");
+}
+
+function cancelarFortes() {
+    document.getElementById("edit-fortes").classList.add("hidden");
+    document.getElementById("lista-fortes").classList.remove("hidden");
+}
+
+async function salvarFortes() {
+    const valores = document.getElementById("input-fortes").value.split("\n").map(s => s.trim()).filter(Boolean);
+    const { error } = await supabaseClient.from("players").update({ pontos_fortes: valores }).eq("id", perfilAtualId);
+    if (error) { alert("Erro: " + error.message); return; }
+    carregarPerfilPagina();
+}
+
+function editarMelhorar() {
+    if (!perfilAtualId) return;
+    document.getElementById("input-melhorar").value = (meuPerfil?.pontos_melhorar || []).join("\n");
+    document.getElementById("lista-melhorar").classList.add("hidden");
+    document.getElementById("edit-melhorar").classList.remove("hidden");
+}
+
+function cancelarMelhorar() {
+    document.getElementById("edit-melhorar").classList.add("hidden");
+    document.getElementById("lista-melhorar").classList.remove("hidden");
+}
+
+async function salvarMelhorar() {
+    const valores = document.getElementById("input-melhorar").value.split("\n").map(s => s.trim()).filter(Boolean);
+    const { error } = await supabaseClient.from("players").update({ pontos_melhorar: valores }).eq("id", perfilAtualId);
+    if (error) { alert("Erro: " + error.message); return; }
     carregarPerfilPagina();
 }
 

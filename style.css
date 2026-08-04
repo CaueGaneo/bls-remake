@@ -876,3 +876,49 @@ body.admin-mode .admin-only-block { display: block; }
 .divider { border: none; border-top: 1px solid #1e293b; margin: 20px 0; }
 
 .empty-hint { color: #64748b; font-size: 0.9rem; }
+
+/* Botões/áreas de edição inline (visíveis só pro ADM, dentro de body.admin-mode) */
+.admin-only-inline { display: none; }
+body.admin-mode .admin-only-inline { display: inline-flex; align-items: center; }
+
+.btn-edit-inline {
+    background: transparent;
+    border: 1px solid #334155;
+    color: #a0aec0;
+    border-radius: 6px;
+    padding: 3px 10px;
+    font-size: 0.72rem;
+    cursor: pointer;
+    margin-left: 10px;
+}
+.btn-edit-inline:hover { background: #334155; color: #fff; }
+
+.inline-edit-box { margin-top: 12px; }
+.inline-edit-box textarea {
+    width: 100%;
+    border-radius: 12px;
+    border: 1px solid #334155;
+    background: #0f172a;
+    color: #fff;
+    padding: 12px 14px;
+    outline: none;
+    font-family: inherit;
+    resize: vertical;
+}
+.inline-edit-box textarea:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px rgba(0,180,255,.12);
+}
+
+.btn-save-inline,
+.btn-cancel-inline {
+    border: none;
+    border-radius: 8px;
+    padding: 8px 16px;
+    font-weight: 700;
+    font-size: 0.85rem;
+    cursor: pointer;
+}
+.btn-save-inline { background: var(--accent); color: #06131f; }
+.btn-cancel-inline { background: #1e293b; color: #fff; }
+.btn-cancel-inline:hover { background: #334155; }

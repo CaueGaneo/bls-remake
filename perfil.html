@@ -118,20 +118,47 @@
           <h3 class="section-title">🎯 Avaliação Técnica <span class="tag-adm">ADM</span></h3>
           <div class="points-grid">
             <div>
-              <h4 class="points-heading strong">✅ Pontos Fortes</h4>
+              <h4 class="points-heading strong">✅ Pontos Fortes
+                <button type="button" class="btn-edit-inline admin-only-inline" onclick="editarFortes()">✏️ Editar</button>
+              </h4>
               <ul class="points-list strong" id="lista-fortes"></ul>
+              <div class="inline-edit-box hidden" id="edit-fortes">
+                <textarea id="input-fortes" rows="4" placeholder="Um ponto por linha"></textarea>
+                <div class="profile-actions">
+                  <button type="button" class="btn-save-inline" onclick="salvarFortes()">💾 Salvar</button>
+                  <button type="button" class="btn-cancel-inline" onclick="cancelarFortes()">Cancelar</button>
+                </div>
+              </div>
             </div>
             <div>
-              <h4 class="points-heading improve">📈 A Melhorar</h4>
+              <h4 class="points-heading improve">📈 A Melhorar
+                <button type="button" class="btn-edit-inline admin-only-inline" onclick="editarMelhorar()">✏️ Editar</button>
+              </h4>
               <ul class="points-list improve" id="lista-melhorar"></ul>
+              <div class="inline-edit-box hidden" id="edit-melhorar">
+                <textarea id="input-melhorar" rows="4" placeholder="Um ponto por linha"></textarea>
+                <div class="profile-actions">
+                  <button type="button" class="btn-save-inline" onclick="salvarMelhorar()">💾 Salvar</button>
+                  <button type="button" class="btn-cancel-inline" onclick="cancelarMelhorar()">Cancelar</button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
 
         <!-- 📝 Relatório -->
         <div class="profile-card">
-          <h3 class="section-title">📝 Relatório Técnico <span class="tag-adm">ADM</span></h3>
+          <h3 class="section-title">📝 Relatório Técnico <span class="tag-adm">ADM</span>
+            <button type="button" class="btn-edit-inline admin-only-inline" onclick="editarComentario()">✏️ Editar</button>
+          </h3>
           <div class="tech-comment" id="comentario-tecnico"></div>
+          <div class="inline-edit-box hidden" id="edit-comentario">
+            <textarea id="input-comentario" rows="4" placeholder="Relatório técnico do jogador..."></textarea>
+            <div class="profile-actions">
+              <button type="button" class="btn-save-inline" onclick="salvarComentario()">💾 Salvar</button>
+              <button type="button" class="btn-cancel-inline" onclick="cancelarComentario()">Cancelar</button>
+            </div>
+          </div>
         </div>
 
         <!-- 🏅 Conquistas -->
@@ -302,7 +329,7 @@
     <footer>
       <p>Beyblade Ranking © 2026 — Que o melhor Blader vença!</p>
       <div class="footer-buttons">
-        <button id="btn-adm" onclick="entrarAdmin()">ADM</button>
+        <button id="btn-adm" class="hidden" onclick="entrarAdmin()">ADM</button>
         <button id="btn-logout" onclick="logout()">🚪 Sair da Conta</button>
       </div>
     </footer>

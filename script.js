@@ -5,8 +5,8 @@ const SUPABASE_URL = "https://mvvktemmkzzmaqqgmnpo.supabase.co";
 const SUPABASE_KEY = "sb_publishable_hN9NakLX5Vb27LmTuBcevg_rrd7it0p";
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// E-mail com permissão de ADM. O botão ADM só aparece pra essa conta.
-const ADMIN_EMAIL = "cauee08@gmail.com";
+// E-mails com permissão de ADM. O botão ADM só aparece pra essas contas.
+const ADMIN_EMAILS = ["cauee08@gmail.com", "phenriquebeira@gmail.com"];
 let isAdmin = false;
 
 // =============================================
@@ -19,7 +19,7 @@ async function verificarSessao() {
     const authScreen = document.getElementById("auth-screen");
     const app = document.getElementById("app");
 
-    isAdmin = (user?.email || "").toLowerCase() === ADMIN_EMAIL;
+    isAdmin = ADMIN_EMAILS.includes((user?.email || "").toLowerCase());
     const btnAdm = document.getElementById("btn-adm");
     if (btnAdm) btnAdm.classList.toggle("hidden", !isAdmin);
     if (!isAdmin) document.body.classList.remove("admin-mode");
